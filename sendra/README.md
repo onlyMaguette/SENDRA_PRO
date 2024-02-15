@@ -1,4 +1,4 @@
-# walletium
+# sendra
 
 A new Flutter project.
 
