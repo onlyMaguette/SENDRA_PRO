@@ -94,7 +94,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                   Text('Erreur'),
                 ],
               ),
-              content: Text('La vérification OTP a échouée.'),
+              content: Text('La vérification OTP a échoué.'),
               actions: [
                 TextButton(
                   onPressed: () {

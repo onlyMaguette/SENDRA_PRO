@@ -74,7 +74,7 @@ class _SignInScreenState extends State<SignInScreen> {
           // Successful authentication, do something (e.g., navigate to the home screen).
           bool success = jsonResponse['success'];
           String fullName = jsonResponse['fullName'];
-          String userId = jsonResponse['userId'];
+          String userId = jsonResponse['userId'].toString();
 
           // After successful sign-in, save user data in SharedPreferences
           await saveUserData(fullName, telephone, userId);
@@ -101,7 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ],
                 ),
                 content: Text(
-                    'La connexion à échoué. Vérifiez le login et le mot de passe.'),
+                    'La connexion a échoué. Vérifiez le login et le mot de passe.'),
                 actions: [
                   TextButton(
                     onPressed: () {
@@ -240,7 +240,7 @@ class _SignInScreenState extends State<SignInScreen> {
               controller: _controller.passwordController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Veuillez saisir le nom';
+                  return 'Veuillez saisir le mot de passe';
                 }
                 return null;
               },

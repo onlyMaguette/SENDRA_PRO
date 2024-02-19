@@ -49,7 +49,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
   bool _validateFields() {
     if (_controller.phoneNumberController.text.isEmpty) {
       Fluttertoast.showToast(
-        msg: "Téléphone obligatoire",
+        msg: "Numéro de téléphone obligatoire",
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
