@@ -180,7 +180,7 @@ class _DepositScreenState extends State<DepositScreen> {
     } catch (e) {
       // Error occurred during the request
       // Handle the error
-      showErrorMessage('An error occurred: $e');
+      showErrorMessage('Une erreur s’est produite: $e');
     }
   }
 
