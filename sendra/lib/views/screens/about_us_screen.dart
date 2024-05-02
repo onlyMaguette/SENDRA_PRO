@@ -44,8 +44,8 @@ class AboutUsScreen extends StatelessWidget {
     return Container(
       alignment: Alignment.center,
       child: Image.asset(
-        Strings.splashLogo,
-        width: 200.w,
+        'assets/images/EPAVIE2.png',
+        fit: BoxFit.contain,
       ),
     );
   }

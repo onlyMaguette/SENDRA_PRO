@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:geocoding/geocoding.dart';
@@ -31,25 +34,21 @@ class DepositScreen extends StatefulWidget {
 
 class _DepositScreenState extends State<DepositScreen> {
   final _controller = Get.put(DepositController());
-  File? _selectedImage;
-  //LocationData? locationData;
-  Position? locationData;
-  String? commune;
-  String? quartier;
+  File? _selectedImageFile;
 
+  Position? locationData;
   String locality = '';
   String subLocality = '';
-
+  String? image;
   double? latitude;
   double? longitude;
 
-  bool _isLoading = false; // Added variable to track loading state
+  bool _isLoading = false;
 
   Future<void> getLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       setState(() {
@@ -58,7 +57,6 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
 
-    // Request location permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
@@ -71,7 +69,6 @@ class _DepositScreenState extends State<DepositScreen> {
       }
     }
 
-    // Get current location
     Position currentPosition = await Geolocator.getCurrentPosition();
     latitude = currentPosition.latitude;
     longitude = currentPosition.longitude;
@@ -80,7 +77,6 @@ class _DepositScreenState extends State<DepositScreen> {
     });
 
     if (locationData != null) {
-      // Get address from coordinates
       try {
         List<Placemark> placemarks = await placemarkFromCoordinates(
           locationData!.latitude,
@@ -103,85 +99,293 @@ class _DepositScreenState extends State<DepositScreen> {
     }
   }
 
-  Future<void> _submitImage() async {
-    if (_controller.carImagePath.value == null) {
+  Future<void> _submitImage(String token) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token == null) {
+      print('Le token n\'a pas été récupéré correctement depuis SharedPreferences');
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
-// Set loading state to true before fetching location
-    setState(() {
-      _isLoading = true;
-    });
-
     var request = http.MultipartRequest(
-      'POST',
-      Uri.parse(Strings.apiURL + 'signalement.php'),
+      'POST', Uri.parse(Strings.apiURI + 'faireSignalement'),
     );
 
-    // Add the string variable as a field
     request.fields['titre'] = _controller.titreController.text;
-
-    // Call getUserLocation() function asynchronously
     await getLocation();
-
     request.fields['commune'] = '$locality';
-    request.fields['quartier'] = '$subLocality';
     request.fields['latitude'] = '$latitude';
     request.fields['longitude'] = '$longitude';
-    request.fields['telephone'] = '774208140';
 
-    // Convert image to base64
-    String base64String =
-        base64Encode(File(_controller.carImagePath.value).readAsBytesSync());
-    request.fields['image'] = base64String;
+    request.files.add(http.MultipartFile('image', File(_selectedImageFile!.path).readAsBytes().asStream(), File(_selectedImageFile!.path).lengthSync(), filename: _selectedImageFile!.path.split('/').last));
 
-    /*request.files.add(
-      await http.MultipartFile.fromPath(
-        'image',
-        _controller.carImagePath.value,
-      ),
-    );*/
+    request.headers['Authorization'] = 'Bearer $token';
 
     try {
-      var response = await request.send();
+      final response = await request.send();
+      print(response.statusCode);
+      print(token);
 
       if (response.statusCode == 200) {
         setState(() {
           _isLoading = false;
-          // Reset values after saving data
-          _controller.titreController.text = ''; // Reset the title field
+          _controller.titreController.text = '';
         });
-        // Image upload successful
-        // Process the response as needed
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Confirmation'),
-              content: Text('Bravo! Votre signalement a été pris en compte.'),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    //Get.toNamed(Routes.depositMoneyDetailsScreen);
-                    Get.toNamed(Routes.bottomNavigationScreen);
-                  },
-                  child: Text('OK'),
+
+        // Show confirmation snackbar
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Votre signalement a été pris en compte !'),
+            behavior: SnackBarBehavior.floating,
+            margin: EdgeInsets.symmetric(horizontal: 40),
+          ),
+        );
+
+        // Navigate to the specified route
+        Get.toNamed(Routes.bottomNavigationScreen);
+      } else {
+        print('Erreur lors de la signalisation');
+      }
+    } catch (e) {
+      print('Erreur lors de la connexion au serveur');
+      showErrorMessage('Une erreur s’est produite: $e');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void showErrorMessage(String message) {
+    final snackBar = SnackBar(
+      content: Text(message),
+    );
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  Future<void> _selectImage() async {
+    final picker = ImagePicker();
+
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Choisissez la source de l\'image'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(ImageSource.gallery),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blueGrey,
+                onPrimary: CustomColor.whiteColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.photo_library),
+                  SizedBox(width: 10),
+                  Text('Galerie'),
+                ],
+              ),
+            ),
+            SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(ImageSource.camera),
+              style: ElevatedButton.styleFrom(
+                primary: Colors.blueGrey,
+                onPrimary: CustomColor.whiteColor,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.camera_alt),
+                  SizedBox(width: 10),
+                  Text('Appareil photo'),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null) {
+      return;
+    }
+    final pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile == null) {
+      return;
+    }
+    setState(() {
+      _selectedImageFile = File(pickedFile.path);
+    });
+
+    // Show preview dialog
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        // Variable pour suivre l'état de chargement
+        bool isLoading = false;
+
+        return StatefulBuilder(
+          builder: (BuildContext context, setState) {
+            return Center(
+              child: isLoading
+                  ? CircularProgressIndicator() // Afficher l'indicateur de chargement si isLoading est vrai
+                  : AlertDialog(
+                title: Text(
+                  'Confirmation',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.green, // Couleur bleue pour le titre
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0), // Coins arrondis
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Container(
+                        width: 200.0, // Ajustez la largeur de l'image comme vous le souhaitez
+                        height: 200.0, // Ajustez la hauteur de l'image comme vous le souhaitez
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.0),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 3,
+                              blurRadius: 7,
+                              offset: Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: _selectedImageFile != null ? Image.file(_selectedImageFile!, fit: BoxFit.cover) : SizedBox.shrink(),
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Confirmez-vous la sélection de cette image ?',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold, // Texte en gras
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.red, // Changer la couleur du bouton en rouge
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
+                            ),
+                          ),
+                          child: Text('Annuler'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () async {
+                            setState(() {
+                              isLoading = true; // Définir isLoading à true pour afficher l'indicateur de chargement
+                            });
+                            showDialog(
+                              barrierDismissible: false, // Empêche la fermeture du dialog en cliquant en dehors de celui-ci
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  backgroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  content: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      CircularProgressIndicator(
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Couleur du spinner
+                                      ),
+                                      SizedBox(height: 16),
+                                      Text(
+                                        'Signalement en cours...',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black,
+                                        ),
+                                      ),
+                                      SizedBox(height: 10),
+                                      Text(
+                                        'Veuillez patienter pendant que nous traitons votre signalement.',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.grey[700],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            );
+                            _submitImage('token');
+                            // Ne pas fermer la boîte de dialogue ici, elle devrait probablement être fermée une fois que le processus de soumission est terminé.
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors.green, // Changer la couleur du bouton en BlueGrey
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
+                            ),
+                          ),
+                          child: isLoading
+                              ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              SizedBox(
+                                width: 24, // Ajustez la largeur pour le spinner
+                                height: 24, // Ajustez la hauteur pour le spinner
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Couleur du spinner
+                                ),
+                              ),
+                              SizedBox(height: 8), // Espacement entre le spinner et le texte
+                              Text(
+                                'Signalement en cours...',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          )
+                              : Text(
+                            'Confirmer',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ),
+
+
+
+
+                      ],
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         );
-        //Get.toNamed(Routes.depositMoneyDetailsScreen);
-      } else {
-        // Image upload failed
-        // Handle the error
-      }
-    } catch (e) {
-      // Error occurred during the request
-      // Handle the error
-      showErrorMessage('Une erreur s’est produite: $e');
-    }
+      },
+    );
   }
 
   @override
@@ -207,9 +411,8 @@ class _DepositScreenState extends State<DepositScreen> {
       children: [
         _inputWidget(context),
         addVerticalSpace(20.h),
-        // _detailsWidget(context),
-        _carPicture(context),
         _continueButtonWidget(context),
+        addVerticalSpace(20.h),
       ],
     );
   }
@@ -225,92 +428,111 @@ class _DepositScreenState extends State<DepositScreen> {
             textColor: CustomColor.textColor,
           ),
           Container(
-            margin:
-                EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
-            child: InputTextField(
-                borderColor: CustomColor.textColor,
-                //labelTextName: Strings.amount,
-                controller: _controller.titreController,
-                hintText: Strings.titre,
-                backgroundColor: CustomColor.whiteColor,
-                hintTextColor: CustomColor.textColor),
+            margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
+            child: TextFormField(
+              style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
+              cursorColor: Colors.black,
+              controller: _controller.titreController,
+              decoration: InputDecoration(
+                hintText: 'Que voulez-vous signaler ?',
+                hintStyle: TextStyle(color: CustomColor.gray),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide: BorderSide(color: Colors.black),
+                  borderRadius: BorderRadius.circular(10.0),
+                ),
+                filled: true,
+                fillColor: CustomColor.whiteColor,
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Veuillez saisir un titre.';
+                }
+                return null;
+              },
+            ),
           ),
           addVerticalSpace(20.h),
-          /*TextLabelsWidget(
-            textLabels: Strings.paymentMethod,
-            textColor: CustomColor.textColor,
-          ),*/
-          /*Container(
-              margin:
-                  EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
-              child: const PaymentMethodInputTextFieldWidget()),*/
         ],
       ),
     );
   }
 
-  Container _detailsWidget(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(Dimensions.marginSize * 0.5),
-      child: Column(
-        mainAxisAlignment: mainStart,
-        crossAxisAlignment: crossStart,
-        children: [
-          _rowWidget(context, Strings.feesJust, Strings.feesMoney),
-          const Divider(),
-          _rowWidget(context, Strings.total, Strings.totalDepositMoney),
-        ],
-      ),
-    );
-  }
-
-  PrimaryButtonWidget _continueButtonWidget(BuildContext context) {
-    return PrimaryButtonWidget(
-      title: Strings.valider,
-      onPressed: () {
-        _submitImage();
-        //Get.toNamed(Routes.depositMoneyDetailsScreen);
-      },
-      borderColor: CustomColor.primaryColor,
-      backgroundColor: CustomColor.primaryColor,
-      textColor: CustomColor.whiteColor,
-      isLoading: _isLoading, // Pass _isLoading to isLoading parameter
-    );
-  }
-
-  Row _rowWidget(BuildContext context, String title, String amount) {
-    return Row(
-      mainAxisAlignment: mainSpaceBet,
+  Widget _continueButtonWidget(BuildContext context) {
+    return Column(
       children: [
-        Text(
-          title,
-          style: CustomStyler.otpVerificationDescriptionStyle,
+        Container(
+          margin: EdgeInsets.symmetric(horizontal: 30.0),
+          child: ElevatedButton(
+            onPressed: () {
+              if (!_isLoading) {
+                // Vérifier si le chargement est déjà en cours
+                if (_controller.formKey.currentState!.validate()) {
+                  setState(() {
+                    _isLoading = false; // Définir l'état de chargement sur vrai
+                  });
+                  _selectImage(); // Appel à la méthode de sélection de l'image
+                }
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              primary: CustomColor.primaryColor, // couleur de fond du bouton
+              onPrimary: CustomColor.whiteColor, // couleur du texte
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0), // bordure arrondie
+              ),
+              elevation: 3, // élévation pour ajouter de la profondeur
+              padding: EdgeInsets.symmetric(vertical: 12.0), // ajuster le rembourrage vertical
+            ),
+            child:_isLoading
+                ? SizedBox(
+              // Afficher un spinner si le chargement est en cours
+              width: 24.0,
+              height: 24.0,
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+                : Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.camera_alt,
+                  size: 24.0,
+                  color: Colors.white,
+                ),
+                SizedBox(width: 10.0), // espace supplémentaire entre l'icône et le texte
+                Text(
+                  Strings.signaler,
+                  style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.bold, // rendre le texte en gras
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
-        Row(
-          children: [
-            Text(
-              amount,
-              style: CustomStyler.otpVerificationDescriptionStyle,
-            ),
-            addHorizontalSpace(5.w),
-            Text(
-              Strings.usd,
-              style: CustomStyler.otpVerificationDescriptionStyle,
-            ),
-          ],
-        )
+        SizedBox(height: 10.0), // ajouter un espace vertical
+        Text(
+          'Cliquez sur "Signaler" pour prendre une photo',
+          style: TextStyle(
+            fontSize: 12.0,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+          ),
+        ),
       ],
     );
-  }
-
-  InputImageWidget _carPicture(BuildContext context) {
-    return InputImageWidget();
-  }
-
-  void showErrorMessage(String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-    );
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }

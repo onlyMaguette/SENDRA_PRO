@@ -15,7 +15,7 @@ class Strings {
   static const String submit = 'ENVOYER';
   static const String okay = 'Okay';
   static const String letsGetStarted = 'LET\'S GET STARTED';
-  static const String valider = 'VALIDER';
+  static const String signaler = 'SIGNALER';
 
   //?pictures
   static const String onboardPicOne = 'assets/images/onboard/onboard-1.png';
@@ -70,8 +70,8 @@ class Strings {
   static const String emailOrUsername = 'Téléphone';
   static const String password = 'Mot de passe';
   static const String enterPassword = 'Mot de passe';
-  static const String forgotPassword = 'Mot de passe oublié?';
-  static const String newToRemesa = 'Nouveau dans SENDRA? ';
+  static const String forgotPassword = 'Mot de passe oublié ?';
+  static const String newToRemesa = 'Nouveau dans SENDRA ? ';
 
   //forgot password
   static const String forgotPasswordDescription =
@@ -113,7 +113,7 @@ class Strings {
   static const String terms =
       'By clicking to Sign Up you need to agree with our all ';
   static const String policy = 'Privacy & Policy';
-  static const String alreadyHaveAcc = 'Déjà inscrit? ';
+  static const String alreadyHaveAcc = 'Êtes-vous déjà inscrit ? ';
 
   //? phone verification screen
   static const String phoneVerification = 'Vérification du numéro';
@@ -135,14 +135,17 @@ class Strings {
   static const String withdraw = 'Withdraw';
   static const String send = 'Send';
   static const String request = 'Request';
-  static const String transactionsHistory = 'Historique de mes participations';
+  static const String transactionsHistory = 'Historique des participations ';
+  static const String myTransactionsHistory = 'Historique de mes participations ';
   static const String moneyDeposit = 'Money Deposit';
   static const String moneyDepositDate = 'March 20, 2022';
   static const String depositMoneyAmount = '1000.00';
   static const String depositMoney = 'Deposit Money';
   static const String signalement = 'Signalement';
+  static const String details = 'Détails du signalement';
 
   static const String apiURL = 'https://demo.sendra.sn/sendra_api/';
+  static const String apiURI = 'https://backend.sendra.sn/api/';
 
   //?wallet screen
   static const String wallet = 'Wallet';
@@ -165,7 +168,7 @@ class Strings {
   static const String notificationTime = 'March 20, 2022';
 
   //?profile screen
-  static const String profile = 'Profile';
+  static const String profile = 'Profil';
   static const String userProfileName = 'Kersuee Limien';
   static const String userId = '@';
   static const String userIdNUmber = 'Username';
@@ -196,6 +199,7 @@ class Strings {
   //? send money details screen
   static const String sendMoneyDetails = 'Send Money Details';
   static const String depositMoneyDetails = 'Signalement';
+  static const String cartoDetails = 'Cartographie';
   static const String recipient = 'Recipient';
   static const String description = 'Description';
   static const String paymentDescription = 'Payment Description';

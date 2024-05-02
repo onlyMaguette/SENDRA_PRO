@@ -28,7 +28,7 @@ String generateVerificationCode() {
 
 void main() {
   String verificationCode = generateVerificationCode();
-  print('Generated Verification Code: $verificationCode');
+  print('Code de vérification généré: $verificationCode');
 }
 
 class SignUpScreen extends StatefulWidget {
@@ -56,7 +56,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
 
     if (response.statusCode == 200) {
-      print('Verification code sent successfully!');
+      print('Le code de vérification a été envoyé avec succès !');
       // If the response is successful, navigate to the next screen for verification
       Get.toNamed(
         Routes.phoneVerificationScreen,
@@ -67,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         },
       );
     } else {
-      print('Failed to send the verification code.');
+      print('Echec de l’envoi du code de vérification.');
     }
   }
 
@@ -88,13 +88,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
       child: Container(
         height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(Strings.signInBg),
-            fit: BoxFit.fill,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.white, // Blanc en haut
+              Colors.green.shade900, // Vert foncé en bas
+            ],
           ),
         ),
         child: ListView(
+          physics: BouncingScrollPhysics(),
           children: [
             _backButton(context),
             _titleAndDesWidget(context),
@@ -106,6 +111,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           ],
         ),
       ),
+
     );
   }
 
@@ -121,7 +127,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
           addHorizontalSpace(10.w),
           Text(
             Strings.signUp,
-            style: CustomStyler.signInStyle,
+            style: TextStyle(
+              color: CustomColor.textColor,
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+            ),
           )
         ],
       ),
@@ -216,9 +226,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               Strings.alreadyHaveAcc,
               style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
                 color: CustomColor.whiteColor,
               ),
             ),
@@ -226,10 +238,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
               onTap: () {
                 Get.back();
               },
-              child: const Text(
+              child:
+              Text(
                 Strings.signIn,
                 style: TextStyle(
-                    color: CustomColor.whiteColor, fontWeight: FontWeight.bold),
+                  color: CustomColor.whiteColor,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.sp,
+                ),
               ),
             ),
           ],

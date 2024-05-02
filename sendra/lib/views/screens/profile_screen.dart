@@ -26,7 +26,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Fetch the user data when the widget is initialized
     getUserData();
   }
 
@@ -36,9 +35,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       fullName = prefs.getString('fullName') ?? 'No name';
       phone = prefs.getString('phone') ?? 'No phone';
     });
-    // Use the retrieved data wherever needed in the app
-    print('Full Name: $fullName');
-    print('Phone: $phone');
   }
 
   @override
@@ -55,56 +51,59 @@ class _ProfileScreenState extends State<ProfileScreen> {
           backButtonImage: Strings.backButtonWhite,
         ),
       ),
-      body: _bodyWidget(context),
-    );
-  }
-
-  ListView _bodyWidget(BuildContext context) {
-    return ListView(
-      children: [
-        //_profilePicture(context),
-        addVerticalSpace(10.h),
-        _usernameAndUserId(context),
-        addVerticalSpace(20.h),
-        _containerWidget(context),
-      ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SizedBox(
+                height: 20.h,
+              ),
+              _profilePicture(context),
+              SizedBox(
+                height: 20.h,
+              ),
+              _usernameAndUserId(context),
+              SizedBox(
+                height: 40.h,
+              ),
+              _containerWidget(context),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
   Container _profilePicture(BuildContext context) {
     return Container(
-      width: 150.h,
-      height: 150.h,
-      margin: EdgeInsets.symmetric(vertical: Dimensions.marginSize * 0.5),
-      decoration: const BoxDecoration(
+      width: 100.h,
+      height: 100.h,
+      decoration: BoxDecoration(
         color: CustomColor.textColor,
-        image: DecorationImage(
-            image: AssetImage(Strings.notificationImage),
-            fit: BoxFit.fitHeight),
         shape: BoxShape.circle,
+      ),
+      child: Icon(
+        Icons.account_circle_rounded,
+        color: CustomColor.whiteColor,
+        size: 80,
       ),
     );
   }
 
   Column _usernameAndUserId(BuildContext context) {
     return Column(
-      mainAxisAlignment: mainCenter,
-      crossAxisAlignment: crossCenter,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           fullName,
           style: CustomStyler.profileNameStyle,
         ),
-        /*Row(
-          mainAxisAlignment: mainCenter,
-          children: [
-            Text(
-              Strings.userId,
-              style: CustomStyler.userIdStyle,
-            ),
-            Text(Strings.userIdNUmber, style: CustomStyler.userIdStyle),
-          ],
-        )*/
+        Text(
+          phone,
+          style: TextStyle(color: CustomColor.textColor, fontSize: 16.sp),
+        ),
       ],
     );
   }
@@ -112,52 +111,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Column _containerWidget(BuildContext context) {
     return Column(
       children: [
-        /*_smallContainer(
-            context, Icons.account_circle_rounded, Strings.editProfile, () {
-          Get.toNamed(Routes.editProfileScreen);
-        }),
-        addVerticalSpace(10.h),*/
-
-        _smallContainer(context, Icons.key, Strings.changePassword, () {
+        _optionCard(context, Icons.key, Strings.changePassword, () {
           Get.toNamed(Routes.changePasswordScreen);
         }),
       ],
     );
   }
 
-  InkWell _smallContainer(BuildContext context, IconData icon, String name,
-      VoidCallback onPressed) {
+  InkWell _optionCard(
+      BuildContext context, IconData icon, String name, VoidCallback onPressed) {
     return InkWell(
       onTap: onPressed,
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
-        padding: EdgeInsets.all(Dimensions.defaultPaddingSize * 0.3),
-        decoration: BoxDecoration(
-          color: CustomColor.whiteColor,
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15.r),
         ),
-        child: Row(
-          mainAxisAlignment: mainSpaceBet,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  icon,
-                  color: CustomColor.textColor,
-                  size: 30,
-                ),
-                addHorizontalSpace(5.w),
-                Text(
-                  name,
-                  style: CustomStyler.editProfileStyle,
-                ),
-              ],
-            ),
-            Icon(
-              Icons.arrow_forward_ios_sharp,
-              color: CustomColor.textColor,
-            ),
-          ],
+        child: Padding(
+          padding: EdgeInsets.all(15.r),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    icon,
+                    color: CustomColor.textColor,
+                    size: 30.sp,
+                  ),
+                  SizedBox(
+                    width: 20.w,
+                  ),
+                  Text(
+                    name,
+                    style: CustomStyler.editProfileStyle,
+                  ),
+                ],
+              ),
+              Icon(
+                Icons.arrow_forward_ios_sharp,
+                color: CustomColor.textColor,
+              ),
+            ],
+          ),
         ),
       ),
     );

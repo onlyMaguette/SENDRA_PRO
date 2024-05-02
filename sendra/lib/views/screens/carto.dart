@@ -27,10 +27,13 @@ class _CartoScreenState extends State<CartoScreen> {
 
   Future<void> _fetchSignalements() async {
     final response = await http.get(
-        Uri.parse(Strings.apiURL + 'historique.php?action=getSignalements'));
+        Uri.parse(Strings.apiURI + 'listerSignalements'));
 
+      print(response.body);
     if (response.statusCode == 200) {
-      List<dynamic> jsonResponse = json.decode(response.body);
+      Map<String, dynamic> responseData = json.decode(response.body);
+      List<dynamic> jsonResponse = responseData['data'];
+      print(jsonResponse);
       setState(() {
         signalements = List<Map<String, dynamic>>.from(jsonResponse);
       });
@@ -45,7 +48,7 @@ class _CartoScreenState extends State<CartoScreen> {
       home: Scaffold(
         appBar: AppBar(
           title: const Text(
-            Strings.depositMoneyDetails,
+            Strings.cartoDetails,
             style: TextStyle(color: CustomColor.whiteColor),
           ),
           leading: const BackButtonWidget(
@@ -80,55 +83,110 @@ class SignalementMap extends StatelessWidget {
         MarkerLayerOptions(
           markers: signalements
               .where((signalement) =>
-                  signalement['latitude'] != null &&
-                  signalement['longitude'] != null)
+          signalement['latitude'] != null &&
+              signalement['longitude'] != null)
               .map((signalement) => Marker(
-                    width: 80.0,
-                    height: 80.0,
-                    point: LatLng(
-                      double.parse(signalement['latitude'].toString()),
-                      double.parse(signalement['longitude'].toString()),
-                    ),
-                    builder: (ctx) => GestureDetector(
-                      onTap: () {
-                        showDialog(
-                          context: ctx,
-                          builder: (BuildContext context) {
-                            return AlertDialog(
-                              title: Text('${signalement['titre']}'),
-                              content: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
+            width: 80.0,
+            height: 80.0,
+            point: LatLng(
+              double.parse(signalement['latitude'].toString()),
+              double.parse(signalement['longitude'].toString()),
+            ),
+            builder: (ctx) => GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: ctx,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0), // Bordures arrondies
+                      ),
+                      title: Text(
+                        '${signalement['titre']}',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Commune : ${signalement['commune']}',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          Text(
+                            'Date : ${signalement['formatted_date']}',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                          SizedBox(height: 20), // Ajouter plus d'espace entre le texte et le bouton
+                          GestureDetector(
+                            onTap: () {
+                              Navigator.pushNamed(
+                                context,
+                                '/depositMoneyDetailsScreen',
+                                arguments: signalement['signalementId'],
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(8.0), // Bordures arrondies pour le bouton
+                              ),
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text('${signalement['commune']}'),
-                                  Text('${signalement['formatted_date']}'),
-                                  SizedBox(height: 10),
-                                  GestureDetector(
-                                    onTap: () {
-                                      Navigator.pushNamed(
-                                          context, '/depositMoneyDetailsScreen',
-                                          arguments: signalement['id']);
-                                    },
-                                    child: Row(
-                                      children: [
-                                        Icon(Icons.remove_red_eye), // Eye icon
-                                        SizedBox(width: 8),
-                                        Text('Voir les détails'),
-                                      ],
+                                  Icon(
+                                    Icons.remove_red_eye,
+                                    color: Colors.white, // Couleur de l'icône en blanc
+                                  ),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Voir les détails',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white, // Couleur du texte en blanc
+                                      fontSize: 16,
                                     ),
                                   ),
                                 ],
                               ),
-                            );
-                          },
-                        );
-                      },
-                      child: Icon(Icons.location_on, color: Colors.red),
-                    ),
-                  ))
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+
+                  },
+                );
+              },
+              child: Icon(
+                Icons.location_on,
+                color: _getMarkerColor(signalement['etat']),  // Couleur basée sur l'état du signalement
+              ),
+            ),
+          ))
               .toList(),
         ),
       ],
     );
+  }
+  Color _getMarkerColor(String etat) {
+    switch (etat) {
+      case 'SIGNALE':
+        return Colors.red;
+      case 'EN COURS':
+        return Colors.orange;
+      case 'ENLEVE':
+        return Colors.green;
+        // Couleur orange pour l'état EN_COURS
+      default:
+        return Colors.black;
+    }
   }
 }

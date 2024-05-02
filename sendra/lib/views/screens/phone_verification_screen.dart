@@ -79,7 +79,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
       } else {
         // Authentication failed, show an error message.
         print(
-            'Authentication failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
+            'Echec de l’authentification !');
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -122,7 +122,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                 Text('Erreur'),
               ],
             ),
-            content: Text('Le code de validation est erroné!'),
+            content: Text('Le code de validation est erroné !'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -263,7 +263,7 @@ class _PhoneVerificationScreenState extends State<PhoneVerificationScreen> {
                     Text('Error'),
                   ],
                 ),
-                content: Text('Please enter the OTP'),
+                content: Text('S’il vous plaît entrer le mot de passe à usage unique'),
                 actions: [
                   TextButton(
                     onPressed: () {

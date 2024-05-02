@@ -24,7 +24,6 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-  //SignInScreen({Key? key}) : super(key: key);
   final _controller = Get.put(SignInController());
   final formKey = GlobalKey<FormState>();
   String _errorMessage = '';
@@ -36,124 +35,82 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-// Method to save user data in SharedPreferences after sign-in
-  Future<void> saveUserData(String fullName, String phone, userId) async {
+  Future<void> saveUserData(String fullName, String phone, id, token) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('fullName', fullName);
     await prefs.setString('phone', phone);
-    await prefs.setString('userId', userId);
+    await prefs.setString('userId', id);
+    await prefs.setString('token', token);
   }
 
   Future<void> _signIn() async {
-    // Get the user input
     String telephone = _controller.emailOrUserNameController.text;
     String password = _controller.passwordController.text;
 
     try {
-      // Send an HTTP POST request to the API endpoint
-      // Create a map of the request body
       Map<String, String> requestBody = {
-        'telephone': '+221' + telephone,
+        'telephone': telephone,
         'password': password,
       };
 
-      // Send an HTTP POST request to the API endpoint
       final response = await http.post(
-        Uri.parse(Strings.apiURL + 'connexion.php'),
+        Uri.parse(Strings.apiURI + 'login'),
         body: requestBody,
       );
 
-      // Process the API response
       if (response.statusCode == 200) {
-        // Successful authentication
-        // You can navigate to the next screen here
-        //Navigator.pushNamed(context, '/home');
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        print(jsonResponse);
         if (jsonResponse['success'] == true) {
-          // Successful authentication, do something (e.g., navigate to the home screen).
           bool success = jsonResponse['success'];
-          String fullName = jsonResponse['fullName'];
+          String fullName = jsonResponse['fullName'].toString();
           String userId = jsonResponse['userId'].toString();
+          String token = jsonResponse['token'].toString();
 
-          // After successful sign-in, save user data in SharedPreferences
-          await saveUserData(fullName, telephone, userId);
-          // Use the data as needed...
-          print('API Response: $jsonResponse');
-          print('Success: $success');
+          await saveUserData(fullName, telephone, userId, token);
+
           Get.toNamed(Routes.bottomNavigationScreen);
         } else {
-          // Authentication failed, show an error message.
-          print(
-              'Authentication failed!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!');
-          showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                    ),
-                    SizedBox(width: 8),
-                    Text('Erreur'),
-                  ],
-                ),
-                content: Text(
-                    'La connexion a échoué. Vérifiez le login et le mot de passe.'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text('OK'),
-                  ),
-                ],
-              );
-            },
-          );
+          String errorMessage = jsonResponse['error'].toString();
+          setState(() {
+            _errorMessage = errorMessage;
+          });
         }
       } else {
-        // Authentication failed
-        // Update the error message
-        setState(() {
-          _errorMessage = 'Authentication failed';
-        });
+        // Handle other status codes or network errors
       }
     } catch (error) {
-      // Error occurred during the HTTP request
       setState(() {
-        _errorMessage = 'An error occurred during the request: $error';
+        _errorMessage = 'An error occurred: $error';
       });
     }
   }
 
-  ScrollConfiguration _bodyWidget(BuildContext context) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(
-        dragDevices: {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-        },
-      ),
-      child: Container(
-        height: MediaQuery.of(context).size.height,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage(Strings.signInBg),
-            fit: BoxFit.fill,
-          ),
+  Widget _bodyWidget(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            Colors.white,
+            Colors.green.shade900,
+          ],
         ),
-        child: ListView(
-          physics: BouncingScrollPhysics(),
+      ),
+      child: SingleChildScrollView(
+        physics: BouncingScrollPhysics(),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             _backButton(context),
             _titleAndDesWidget(context),
-            addVerticalSpace(100.h),
+            SizedBox(height: 20.h),
             _inputWidgets(context),
+            SizedBox(height: 10.h),
             _signInButtonWidget(context),
+            SizedBox(height: 5.h),
             _forgotPasswordWidget(context),
+            SizedBox(height: 5.h),
             _signUpWidget(context),
           ],
         ),
@@ -161,62 +118,70 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Container _backButton(BuildContext context) {
+  Widget _backButton(BuildContext context) {
     return Container(
       alignment: Alignment.topLeft,
       margin: EdgeInsets.all(Dimensions.marginSize * 0.5),
       child: Row(
         children: [
-          const BackButtonWidget(
+          BackButtonWidget(
             backButtonImage: Strings.backButton,
           ),
-          addHorizontalSpace(10.w),
+          SizedBox(width: 10.w),
           Text(
             Strings.signIn,
-            style: CustomStyler.signInStyle,
+            style: TextStyle(
+              color: CustomColor.textColor,
+              fontSize: 24.sp,
+              fontWeight: FontWeight.bold,
+            ),
           )
         ],
       ),
     );
   }
 
-  Container _titleAndDesWidget(BuildContext context) {
+  Widget _titleAndDesWidget(BuildContext context) {
     return Container(
       margin: EdgeInsets.all(Dimensions.marginSize),
       child: Column(
-        crossAxisAlignment: crossStart,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(
-            Strings.signInTitle,
-            style: CustomStyler.signInTitleStyle,
+          Image.asset(
+            'assets/images/EPAVIE2.png',
+            fit: BoxFit.contain,
+            width: MediaQuery.of(context).size.width * 0.8,
+            height: MediaQuery.of(context).size.width * 0.9 * (3 / 4),
           ),
-          addVerticalSpace(10.h),
-          Text(
+          /*Text(
             Strings.signInDescription,
-            style: CustomStyler.onboardDesStyle,
-          ),
+            style: TextStyle(
+              color: CustomColor.textColor,
+              fontSize: 18.sp,
+              fontWeight: FontWeight.w500,
+            ),
+          ),*/
         ],
       ),
     );
   }
 
-  Form _inputWidgets(BuildContext context) {
+  Widget _inputWidgets(BuildContext context) {
     return Form(
       key: formKey,
       child: Column(
         children: [
           TextLabelsWidget(
-            textLabels: Strings.emailOrUsername,
+            textLabels: Strings.phoneNumber,
             textColor: CustomColor.whiteColor,
           ),
           Container(
-            margin:
-                EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
+            margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
             child: TextFormField(
               controller: _controller.emailOrUserNameController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Veuillez saisir le nom';
+                  return 'Please enter your email';
                 }
                 return null;
               },
@@ -234,13 +199,12 @@ class _SignInScreenState extends State<SignInScreen> {
             textColor: CustomColor.whiteColor,
           ),
           Container(
-            margin:
-                EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
+            margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
             child: TextFormField(
               controller: _controller.passwordController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Veuillez saisir le mot de passe';
+                  return 'Please enter your password';
                 }
                 return null;
               },
@@ -259,72 +223,82 @@ class _SignInScreenState extends State<SignInScreen> {
     );
   }
 
-  Column _signInButtonWidget(BuildContext context) {
-    return Column(children: [
-      PrimaryButtonWidget(
-        title: Strings.signIn,
-        onPressed: () {
-          //Get.toNamed(Routes.bottomNavigationScreen);
-          if (formKey.currentState != null &&
-              formKey.currentState!.validate()) {
-            _signIn();
-          }
-        },
-        borderColor: Color.fromARGB(255, 27, 27, 55),
-        backgroundColor: CustomColor.textColor,
-        textColor: CustomColor.whiteColor,
-      ),
-      Text(
-        _errorMessage,
-        style: TextStyle(color: Colors.white),
-      ),
-    ]);
+  Widget _signInButtonWidget(BuildContext context) {
+    return Column(
+      children: [
+        PrimaryButtonWidget(
+          title: Strings.signIn,
+          onPressed: () {
+            if (formKey.currentState != null && formKey.currentState!.validate()) {
+              _signIn();
+            }
+          },
+          borderColor: Color.fromARGB(255, 27, 27, 55),
+          backgroundColor: CustomColor.textColor,
+          textColor: CustomColor.whiteColor,
+        ),
+        Text(
+          _errorMessage,
+          style: TextStyle(color: Colors.white),
+        ),
+      ],
+    );
   }
 
-  Container _forgotPasswordWidget(BuildContext context) {
+  Widget _forgotPasswordWidget(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      margin: EdgeInsets.all(Dimensions.marginSize),
+      margin: EdgeInsets.only(top: 5.h), // Réduire la marge supérieure
       child: GestureDetector(
         onTap: () {
           _forgotPasswordScreen(context);
         },
-        child: const Text(
+        child: Text(
           Strings.forgotPassword,
-          style: TextStyle(color: CustomColor.whiteColor),
+          style: TextStyle(
+            color: CustomColor.whiteColor,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w500,
+          ),
         ),
       ),
     );
   }
 
-  Container _signUpWidget(BuildContext context) {
+
+  Widget _signUpWidget(BuildContext context) {
     return Container(
-        alignment: Alignment.bottomCenter,
-        margin: EdgeInsets.all(Dimensions.marginSize),
-        child: Row(
-          mainAxisAlignment: mainCenter,
-          children: [
-            const Text(
-              Strings.newToRemesa,
+      alignment: Alignment.bottomCenter,
+      margin: EdgeInsets.all(Dimensions.marginSize),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text(
+            Strings.newToRemesa,
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w500,
+              color: CustomColor.whiteColor,
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              Get.toNamed(Routes.signUpScreen);
+            },
+            child: Text(
+              Strings.signUp,
               style: TextStyle(
                 color: CustomColor.whiteColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16.sp,
               ),
             ),
-            GestureDetector(
-              onTap: () {
-                Get.toNamed(Routes.signUpScreen);
-              },
-              child: const Text(
-                Strings.signUp,
-                style: TextStyle(
-                    color: CustomColor.whiteColor, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 
-  //Forgot Password Screen
   Future _forgotPasswordScreen(BuildContext context) {
     final forgotFormKey = GlobalKey<FormState>();
     var width = MediaQuery.of(context).size.width;
@@ -336,8 +310,7 @@ class _SignInScreenState extends State<SignInScreen> {
             insetPadding: EdgeInsets.all(Dimensions.defaultPaddingSize * 0.2),
             contentPadding: EdgeInsets.zero,
             clipBehavior: Clip.antiAliasWithSaveLayer,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             content: Builder(
               builder: (context) {
                 return Container(
@@ -353,7 +326,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            addVerticalSpace(20.h),
+                            SizedBox(height: 20.h),
                             Container(
                               decoration: const BoxDecoration(
                                 color: CustomColor.primaryBackgroundColor,
@@ -363,7 +336,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 height: 100,
                               ),
                             ),
-                            addVerticalSpace(20.h),
+                            SizedBox(height: 20.h),
                             Text(
                               Strings.forgotPasswordTitle,
                               textAlign: TextAlign.center,
@@ -372,10 +345,9 @@ class _SignInScreenState extends State<SignInScreen> {
                                   fontSize: Dimensions.largeTextSize + 5,
                                   fontWeight: FontWeight.w700),
                             ),
-                            addVerticalSpace(20.h),
+                            SizedBox(height: 20.h),
                             Container(
-                              margin: EdgeInsets.symmetric(
-                                  horizontal: Dimensions.marginSize),
+                              margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize),
                               width: double.infinity,
                               child: Text(
                                 Strings.forgotPasswordDescription,
@@ -393,8 +365,7 @@ class _SignInScreenState extends State<SignInScreen> {
                             Form(
                               key: forgotFormKey,
                               child: Container(
-                                margin: EdgeInsets.symmetric(
-                                    horizontal: Dimensions.marginSize * 0.5),
+                                margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize * 0.5),
                                 child: InputTextField(
                                   hintText: Strings.enterPhoneNumber,
                                   hintTextColor: CustomColor.textColor,
@@ -422,7 +393,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               onPressed: () {
                                 Get.back();
                               },
-                              icon: const Icon(
+                              icon: Icon(
                                 Icons.close,
                                 color: CustomColor.gray,
                               ),

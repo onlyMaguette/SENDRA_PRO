@@ -19,6 +19,7 @@ class InputImageWidget extends StatelessWidget {
   final _controller = Get.put(InputImageController());
   final _controller_deposit = Get.put(DepositController());
 
+
   File? pickedFile;
 
   ImagePicker imagePicker = ImagePicker();
@@ -26,7 +27,7 @@ class InputImageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Container(
+          () => Container(
           width: 100.w,
           height: 150.h,
           margin: EdgeInsets.all(Dimensions.marginSize * 0.5),
@@ -36,73 +37,110 @@ class InputImageWidget extends StatelessWidget {
             image: DecorationImage(
               image: _controller.carImagePath.value.isNotEmpty
                   ? FileImage(File(_controller.carImagePath.value))
-                      as ImageProvider
+              as ImageProvider
                   : const AssetImage(Strings.carPlaceHolder),
               // fit: BoxFit.cover,
             ),
           ),
-          child: Container(
-            alignment: Alignment.bottomCenter,
-            padding: EdgeInsets.all(Dimensions.defaultPaddingSize * 0.3),
-            child: InkWell(
-              onTap: () {
-                showModalBottomSheet(
-                    context: context,
-                    builder: (context) => _bottomSheet(context));
-              },
-              child: const Icon(
-                Icons.camera_alt,
-                color: CustomColor.whiteColor,
+            child: Container(
+              alignment: Alignment.bottomCenter,
+              padding: EdgeInsets.all(Dimensions.defaultPaddingSize * 0.3),
+              child: Material(
+                color: Colors.transparent, // Couleur de fond transparente pour que la forme ronde soit visible
+                child: InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                      context: context,
+                      builder: (context) => _bottomSheet(context),
+                    );
+                  },
+                  customBorder: CircleBorder(), // Forme ronde autour de l'icône
+                  child: Container(
+                    padding: EdgeInsets.all(12), // Ajustez la taille du padding selon votre préférence
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle, // Forme ronde
+                      color: Colors.grey.withOpacity(0.3), // Couleur de fond de la forme ronde
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.black,
+                    ),
+                  ),
+                ),
               ),
             ),
-          )),
+          ),
     );
   }
 
   Container _bottomSheet(BuildContext context) {
     return Container(
       width: double.infinity,
-      height: 100.h,
+      height: 120.h,
       margin: EdgeInsets.all(Dimensions.marginSize * 0.5),
-      // decoration: const BoxDecoration(
-      //     color: Colors.orange,
-      //     shape: BoxShape.circle
-      // ),
       child: Row(
-        mainAxisAlignment: mainCenter,
         children: [
-          Padding(
-            padding: EdgeInsets.all(Dimensions.defaultPaddingSize),
-            child: IconButton(
-                onPressed: () {
-                  takeCarPhoto(ImageSource.gallery);
-                },
-                icon: const Icon(
-                  Icons.image,
-                  color: Color.fromARGB(255, 31, 67, 43),
-                  size: 50,
-                )),
+          Expanded( // Utiliser Expanded pour obtenir un espace égal à gauche
+            child: _buildOptionButton(
+              icon: Icons.image,
+              text: 'Galerie',
+              onPressed: () {
+                takeCarPhoto(context, ImageSource.gallery);
+              },
+            ),
           ),
-          Padding(
-            padding: EdgeInsets.all(Dimensions.defaultPaddingSize),
-            child: IconButton(
-                onPressed: () {
-                  takeCarPhoto(ImageSource.camera);
-                },
-                icon: const Icon(
-                  Icons.camera,
-                  color: CustomColor.primaryColor,
-                  size: 50,
-                )),
+          Expanded( // Utiliser Expanded pour obtenir un espace égal à droite
+            child: _buildOptionButton(
+              icon: Icons.camera,
+              text: 'Appareil photo',
+              onPressed: () {
+                takeCarPhoto(context, ImageSource.camera);
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
+
+  Widget _buildOptionButton({required IconData icon, required String text, required VoidCallback onPressed}) {
+    return Column(
+      children: [
+        GestureDetector(
+          onTap: onPressed,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.grey.withOpacity(0.3),
+            ),
+            padding: EdgeInsets.all(10.w), // Réduire la taille du padding pour réduire la taille de la forme ronde
+            child: Icon(
+              icon,
+              color: Colors.black,
+              size: 50.sp,
+            ),
+          ),
+        ),
+        SizedBox(height: 10.h),
+        Text(
+          text,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
+
+
   Future<void> takePhoto(ImageSource source) async {
     final pickedImage =
-        await imagePicker.pickImage(source: source, imageQuality: 100);
+    await imagePicker.pickImage(source: source, imageQuality: 100);
     if (pickedFile != null) {
       pickedFile = File(pickedImage!.path);
       _controller.setCampaignImagePath(pickedFile!.path);
@@ -110,13 +148,14 @@ class InputImageWidget extends StatelessWidget {
     }
   }
 
-  Future<void> takeCarPhoto(ImageSource source) async {
+  Future<void> takeCarPhoto(BuildContext context, ImageSource source) async {
     final pickedImage =
-        await imagePicker.pickImage(source: source, imageQuality: 100);
+    await imagePicker.pickImage(source: source, imageQuality: 100);
     if (pickedImage != null) {
       final String imagePath = pickedImage.path;
       _controller.setCarImageImagePath(imagePath);
       _controller_deposit.setCarImageImagePath(imagePath);
+      Navigator.of(context).pop(); // Close the bottom sheet
     }
   }
 }

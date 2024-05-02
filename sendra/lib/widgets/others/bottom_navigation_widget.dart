@@ -43,11 +43,34 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
             type: BottomNavigationBarType.fixed,
             unselectedFontSize: 11,
             selectedFontSize: 12,
-            elevation: 3,
-            unselectedLabelStyle: const TextStyle(fontSize: 8),
-            selectedLabelStyle: const TextStyle(fontSize: 12),
-            items: BottomNavigationController.navigationBarItems,
+            elevation: 12, // Augmenter légèrement l'élévation pour l'effet flottant
+            selectedIconTheme: IconThemeData(
+              color: Colors.white, // Couleur de l'icône sélectionnée
+              size: 40, // Taille de l'icône sélectionnée
+            ),
+            selectedLabelStyle: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold, // Style du texte pour l'élément sélectionné
+            ),
+            items: BottomNavigationController.navigationBarItems.map((item) {
+              return BottomNavigationBarItem(
+                icon: Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12), // Bordure arrondie
+                    border: Border.all(
+                      color: CustomColor.primaryColor, // Couleur de la bordure
+                      width: 2, // Largeur de la bordure
+                    ),
+                  ),
+                  child: item.icon,
+                ),
+                label: item.label,
+              );
+            }).toList(),
           ),
+
+
         ),
       ),
     );

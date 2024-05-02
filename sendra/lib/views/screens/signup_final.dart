@@ -29,7 +29,7 @@ String generateVerificationCode() {
 
 void main() {
   String verificationCode = generateVerificationCode();
-  print('Generated Verification Code: $verificationCode');
+  print('Code de vérification généré: $verificationCode');
 }
 
 class SignUpFinalScreen extends StatefulWidget {
@@ -49,7 +49,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
   bool _validateFields() {
     if (_controller.phoneNumberController.text.isEmpty) {
       Fluttertoast.showToast(
-        msg: "Numéro de téléphone obligatoire",
+        msg: 'Numéro de téléphone obligatoire',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -62,7 +62,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
     if (_controller.nameController.text.isEmpty) {
       // Show an error or toast message for empty name
       Fluttertoast.showToast(
-        msg: "Nom obligatoire",
+        msg: 'Nom obligatoire',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -75,7 +75,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
     if (_controller.passwordController.text.isEmpty) {
       // Show an error or toast message for empty password
       Fluttertoast.showToast(
-        msg: "Mot de passe obligatoire",
+        msg: 'Mot de passe obligatoire',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -88,7 +88,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
     if (_controller.confirmPasswordController.text.isEmpty) {
       // Show an error or toast message for empty confirm password
       Fluttertoast.showToast(
-        msg: "Confirmer le mot de passe",
+        msg: 'Confirmer le mot de passe',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -102,7 +102,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
         _controller.confirmPasswordController.text) {
       // Show an error or toast message for password mismatch
       Fluttertoast.showToast(
-        msg: "Les deux mots de passe doivent correspondre",
+        msg: 'Les deux mots de passe doivent correspondre',
         toastLength: Toast.LENGTH_SHORT,
         gravity: ToastGravity.BOTTOM,
         timeInSecForIosWeb: 1,
@@ -145,7 +145,7 @@ class _SignUpFinalScreenState extends State<SignUpFinalScreen> {
         },
       );
     } else {
-      print('Failed to send the verification code.');
+      print('Echec de l’envoi du code de vérification.');
     }
   }
 
