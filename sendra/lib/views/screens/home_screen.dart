@@ -216,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                primary: Colors.white, // Blanc
+                backgroundColor: Colors.white, // Blanc
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -602,8 +602,8 @@ class _HomeScreenState extends State<HomeScreen> {
               Get.toNamed(Routes.depositScreen);
             },
             style: ElevatedButton.styleFrom(
-              primary: Colors.green,
-              onPrimary: Colors.white,
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20.0),
               ),

@@ -232,19 +232,19 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
                   center: LatLng(latitude, longitude),
                   zoom: 13.0,
                 ),
-                layers: [
-                  TileLayerOptions(
+                children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
+                  TileLayer(
                     urlTemplate:
                     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                     subdomains: ['a', 'b', 'c'],
                   ),
-                  MarkerLayerOptions(
+                  MarkerLayer(
                     markers: [
                       Marker(
                         width: 40.0,
                         height: 40.0,
                         point: LatLng(latitude, longitude),
-                        builder: (ctx) => Container(
+                        child: Container(
                           child: Icon(
                             Icons.location_on,
                             color: markerColor,
@@ -256,6 +256,7 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
                 ],
               ),
             ),
+
             Padding(
               padding: EdgeInsets.all(16.0),
               child: Column(

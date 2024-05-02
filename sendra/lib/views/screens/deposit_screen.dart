@@ -179,8 +179,8 @@ class _DepositScreenState extends State<DepositScreen> {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(ImageSource.gallery),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey,
-                onPrimary: CustomColor.whiteColor,
+                backgroundColor: Colors.blueGrey,
+                foregroundColor: CustomColor.whiteColor,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -195,8 +195,8 @@ class _DepositScreenState extends State<DepositScreen> {
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(ImageSource.camera),
               style: ElevatedButton.styleFrom(
-                primary: Colors.blueGrey,
-                onPrimary: CustomColor.whiteColor,
+                backgroundColor: Colors.blueGrey,
+                foregroundColor: CustomColor.whiteColor,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -287,7 +287,7 @@ class _DepositScreenState extends State<DepositScreen> {
                             Navigator.of(context).pop(); // Fermer la boîte de dialogue
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.red, // Changer la couleur du bouton en rouge
+                            backgroundColor: Colors.red, // Changer la couleur du bouton en rouge
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
                             ),
@@ -341,7 +341,7 @@ class _DepositScreenState extends State<DepositScreen> {
                             // Ne pas fermer la boîte de dialogue ici, elle devrait probablement être fermée une fois que le processus de soumission est terminé.
                           },
                           style: ElevatedButton.styleFrom(
-                            primary: Colors.green, // Changer la couleur du bouton en BlueGrey
+                            backgroundColor: Colors.green, // Changer la couleur du bouton en BlueGrey
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
                             ),
@@ -486,8 +486,8 @@ class _DepositScreenState extends State<DepositScreen> {
               }
             },
             style: ElevatedButton.styleFrom(
-              primary: CustomColor.primaryColor, // couleur de fond du bouton
-              onPrimary: CustomColor.whiteColor, // couleur du texte
+              backgroundColor: CustomColor.primaryColor, // couleur de fond du bouton
+              foregroundColor: CustomColor.whiteColor, // couleur du texte
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10.0), // bordure arrondie
               ),

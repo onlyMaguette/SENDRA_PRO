@@ -27,9 +27,10 @@ class _CartoScreenState extends State<CartoScreen> {
 
   Future<void> _fetchSignalements() async {
     final response = await http.get(
-        Uri.parse(Strings.apiURI + 'listerSignalements'));
+      Uri.parse(Strings.apiURI + 'listerSignalements'),
+    );
 
-      print(response.body);
+    print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> responseData = json.decode(response.body);
       List<dynamic> jsonResponse = responseData['data'];
@@ -75,12 +76,12 @@ class SignalementMap extends StatelessWidget {
         center: LatLng(14.7488, -17.3909), // Pikine's coordinates
         zoom: 10, // Zoom level
       ),
-      layers: [
-        TileLayerOptions(
+      children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
+        TileLayer(
           urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
           subdomains: ['a', 'b', 'c'],
         ),
-        MarkerLayerOptions(
+        MarkerLayer(
           markers: signalements
               .where((signalement) =>
           signalement['latitude'] != null &&
@@ -92,14 +93,15 @@ class SignalementMap extends StatelessWidget {
               double.parse(signalement['latitude'].toString()),
               double.parse(signalement['longitude'].toString()),
             ),
-            builder: (ctx) => GestureDetector(
+            child: GestureDetector(
               onTap: () {
                 showDialog(
-                  context: ctx,
+                  context: context,
                   builder: (BuildContext context) {
                     return AlertDialog(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16.0), // Bordures arrondies
+                        borderRadius: BorderRadius.circular(16.0),
+                        // Bordures arrondies
                       ),
                       title: Text(
                         '${signalement['titre']}',
@@ -123,7 +125,7 @@ class SignalementMap extends StatelessWidget {
                               fontSize: 16.0,
                             ),
                           ),
-                          SizedBox(height: 20), // Ajouter plus d'espace entre le texte et le bouton
+                          SizedBox(height: 20),
                           GestureDetector(
                             onTap: () {
                               Navigator.pushNamed(
@@ -133,24 +135,29 @@ class SignalementMap extends StatelessWidget {
                               );
                             },
                             child: Container(
-                              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 8.0, horizontal: 16.0),
                               decoration: BoxDecoration(
                                 color: Colors.green,
-                                borderRadius: BorderRadius.circular(8.0), // Bordures arrondies pour le bouton
+                                borderRadius:
+                                BorderRadius.circular(8.0),
+                                // Bordures arrondies pour le bouton
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
                                     Icons.remove_red_eye,
-                                    color: Colors.white, // Couleur de l'icône en blanc
+                                    color: Colors.white,
+                                    // Couleur de l'icône en blanc
                                   ),
                                   SizedBox(width: 8),
                                   Text(
                                     'Voir les détails',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.white, // Couleur du texte en blanc
+                                      color: Colors.white,
+                                      // Couleur du texte en blanc
                                       fontSize: 16,
                                     ),
                                   ),
@@ -161,13 +168,13 @@ class SignalementMap extends StatelessWidget {
                         ],
                       ),
                     );
-
                   },
                 );
               },
               child: Icon(
                 Icons.location_on,
-                color: _getMarkerColor(signalement['etat']),  // Couleur basée sur l'état du signalement
+                color: _getMarkerColor(signalement['etat']),
+                // Couleur basée sur l'état du signalement
               ),
             ),
           ))
@@ -176,6 +183,8 @@ class SignalementMap extends StatelessWidget {
       ],
     );
   }
+
+
   Color _getMarkerColor(String etat) {
     switch (etat) {
       case 'SIGNALE':
@@ -184,7 +193,7 @@ class SignalementMap extends StatelessWidget {
         return Colors.orange;
       case 'ENLEVE':
         return Colors.green;
-        // Couleur orange pour l'état EN_COURS
+    // Couleur orange pour l'état EN_COURS
       default:
         return Colors.black;
     }

@@ -79,7 +79,7 @@ class _TransactionsHistoryScreenState extends State<TransactionsHistoryScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.h),
       child: Scrollbar(
-        isAlwaysShown: true,
+        showTrackOnHover: true,
         thickness: 6,
         radius: Radius.circular(3),
         child: ListView.builder(
