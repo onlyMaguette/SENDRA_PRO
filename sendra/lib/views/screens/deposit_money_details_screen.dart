@@ -234,9 +234,7 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
                 ),
                 children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
                   TileLayer(
-                    urlTemplate:
-                    'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                    subdomains: ['a', 'b', 'c'],
+                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                   ),
                   MarkerLayer(
                     markers: [
