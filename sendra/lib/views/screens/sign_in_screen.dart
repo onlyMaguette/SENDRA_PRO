@@ -47,6 +47,13 @@ class _SignInScreenState extends State<SignInScreen> {
     String telephone = _controller.emailOrUserNameController.text;
     String password = _controller.passwordController.text;
 
+    if (telephone.isEmpty || password.isEmpty) {
+      setState(() {
+        _errorMessage = 'Veuillez saisir le numéro de téléphone et le mot de passe.';
+      });
+      return;
+    }
+
     try {
       Map<String, String> requestBody = {
         'telephone': telephone,
@@ -60,8 +67,8 @@ class _SignInScreenState extends State<SignInScreen> {
 
       if (response.statusCode == 200) {
         Map<String, dynamic> jsonResponse = jsonDecode(response.body);
-        if (jsonResponse['success'] == true) {
-          bool success = jsonResponse['success'];
+        bool success = jsonResponse['success'];
+        if (success) {
           String fullName = jsonResponse['fullName'].toString();
           String userId = jsonResponse['userId'].toString();
           String token = jsonResponse['token'].toString();
@@ -75,8 +82,76 @@ class _SignInScreenState extends State<SignInScreen> {
             _errorMessage = errorMessage;
           });
         }
+      } else if (response.statusCode == 401) {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                'Erreur de connexion',
+                style: TextStyle(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Les informations saisies sont incorrectes. Veuillez vérifier le numéro de téléphone et le mot de passe.',
+                    style: TextStyle(
+                      color: CustomColor.textColor,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       } else {
-        // Handle other status codes or network errors
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text(
+                'Erreur',
+                style: TextStyle(
+                  color: CustomColor.textColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Une erreur s’est produite lors de la demande. Veuillez réessayer plus tard.',
+                    style: TextStyle(
+                      color: CustomColor.textColor,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       }
     } catch (error) {
       setState(() {
@@ -153,14 +228,6 @@ class _SignInScreenState extends State<SignInScreen> {
             width: MediaQuery.of(context).size.width * 0.8,
             height: MediaQuery.of(context).size.width * 0.9 * (3 / 4),
           ),
-          /*Text(
-            Strings.signInDescription,
-            style: TextStyle(
-              color: CustomColor.textColor,
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w500,
-            ),
-          ),*/
         ],
       ),
     );
@@ -181,7 +248,7 @@ class _SignInScreenState extends State<SignInScreen> {
               controller: _controller.emailOrUserNameController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Please enter your email';
+                  return 'Veuillez saisir votre numéro de téléphone';
                 }
                 return null;
               },
@@ -204,7 +271,7 @@ class _SignInScreenState extends State<SignInScreen> {
               controller: _controller.passwordController,
               validator: (value) {
                 if (value!.isEmpty) {
-                  return 'Please enter your password';
+                  return 'Veuillez saisir votre mot de passe';
                 }
                 return null;
               },
@@ -248,7 +315,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _forgotPasswordWidget(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      margin: EdgeInsets.only(top: 5.h), // Réduire la marge supérieure
+      margin: EdgeInsets.only(top: 5.h),
       child: GestureDetector(
         onTap: () {
           _forgotPasswordScreen(context);
@@ -264,7 +331,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
     );
   }
-
 
   Widget _signUpWidget(BuildContext context) {
     return Container(

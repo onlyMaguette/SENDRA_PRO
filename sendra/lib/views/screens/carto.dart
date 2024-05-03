@@ -45,21 +45,19 @@ class _CartoScreenState extends State<CartoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            Strings.cartoDetails,
-            style: TextStyle(color: CustomColor.whiteColor),
-          ),
-          leading: const BackButtonWidget(
-            backButtonImage: Strings.backButtonWhite,
-          ),
-          backgroundColor: CustomColor.primaryColor,
-          elevation: 0,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text(
+          Strings.cartoDetails,
+          style: TextStyle(color: CustomColor.whiteColor),
         ),
-        body: SignalementMap(signalements: signalements),
+        leading: const BackButtonWidget(
+          backButtonImage: Strings.backButtonWhite,
+        ),
+        backgroundColor: CustomColor.primaryColor,
+        elevation: 0,
       ),
+      body: SignalementMap(signalements: signalements),
     );
   }
 }
@@ -78,8 +76,7 @@ class SignalementMap extends StatelessWidget {
       ),
       children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
         TileLayer(
-          urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-          subdomains: ['a', 'b', 'c'],
+          urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         ),
         MarkerLayer(
           markers: signalements
@@ -109,9 +106,8 @@ class SignalementMap extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      content: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+                      content: ListView(
+                        shrinkWrap: true,
                         children: [
                           Text(
                             'Commune : ${signalement['commune']}',
@@ -177,6 +173,7 @@ class SignalementMap extends StatelessWidget {
                 // Couleur basée sur l'état du signalement
               ),
             ),
+
           ))
               .toList(),
         ),

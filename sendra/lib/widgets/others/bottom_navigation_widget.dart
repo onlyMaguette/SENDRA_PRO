@@ -26,7 +26,7 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
   @override
   Widget build(BuildContext context) {
     return Obx(
-      () => Scaffold(
+          () => Scaffold(
         backgroundColor: CustomColor.primaryBackgroundColor,
         body: mainScreens[_controller.getIndex()],
         bottomNavigationBar: BottomAppBar(
@@ -34,6 +34,8 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
           color: CustomColor.primaryBackgroundColor,
           clipBehavior: Clip.hardEdge,
           notchMargin: 6,
+          height: kBottomNavigationBarHeight + 50,
+
           child: BottomNavigationBar(
             onTap: (index) => _controller.setIndex(index),
             backgroundColor: CustomColor.primaryColor,
@@ -43,36 +45,36 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
             type: BottomNavigationBarType.fixed,
             unselectedFontSize: 11,
             selectedFontSize: 12,
-            elevation: 12, // Augmenter légèrement l'élévation pour l'effet flottant
+            elevation: 12,
             selectedIconTheme: IconThemeData(
-              color: Colors.white, // Couleur de l'icône sélectionnée
-              size: 40, // Taille de l'icône sélectionnée
+              color: Colors.white,
             ),
             selectedLabelStyle: const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.bold, // Style du texte pour l'élément sélectionné
+              fontWeight: FontWeight.bold,
             ),
             items: BottomNavigationController.navigationBarItems.map((item) {
               return BottomNavigationBarItem(
-                icon: Container(
-                  padding: EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12), // Bordure arrondie
-                    border: Border.all(
-                      color: CustomColor.primaryColor, // Couleur de la bordure
-                      width: 2, // Largeur de la bordure
+                icon: Expanded(
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30), // Bordure arrondie
+                      border: Border.all(
+                        color: CustomColor.primaryColor, // Couleur de la bordure
+                        width: 2, // Largeur de la bordure
+                      ),
                     ),
+                    child: item.icon,
                   ),
-                  child: item.icon,
                 ),
                 label: item.label,
               );
             }).toList(),
           ),
-
-
         ),
       ),
     );
   }
+
 }
