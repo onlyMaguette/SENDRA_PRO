@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'dart:io'; // Ajoutez cette ligne pour importer SocketException
+import 'dart:async'; // Ajoutez cette ligne pour importer TimeoutException
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -154,10 +156,19 @@ class _SignInScreenState extends State<SignInScreen> {
         );
       }
     } catch (error) {
+      String errorMessage;
+      if (error is SocketException) {
+        errorMessage = 'Erreur de connexion réseau. Veuillez vérifier votre connexion internet.';
+      } else if (error is TimeoutException) {
+        errorMessage = 'La demande a expiré. Veuillez réessayer plus tard.';
+      } else {
+        errorMessage = 'Une erreur s\'est produite : $error';
+      }
       setState(() {
-        _errorMessage = 'An error occurred: $error';
+        _errorMessage = errorMessage;
       });
     }
+
   }
 
   Widget _bodyWidget(BuildContext context) {

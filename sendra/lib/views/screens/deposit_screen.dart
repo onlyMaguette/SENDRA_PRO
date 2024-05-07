@@ -110,6 +110,10 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
 
+    // Convertir l'image en base64
+    List<int> imageBytes = await _selectedImageFile!.readAsBytes();
+    String base64Image = base64.encode(imageBytes);
+
     var request = http.MultipartRequest(
       'POST', Uri.parse(Strings.apiURI + 'faireSignalement'),
     );
@@ -120,13 +124,16 @@ class _DepositScreenState extends State<DepositScreen> {
     request.fields['latitude'] = '$latitude';
     request.fields['longitude'] = '$longitude';
 
-    request.files.add(http.MultipartFile('image', File(_selectedImageFile!.path).readAsBytes().asStream(), File(_selectedImageFile!.path).lengthSync(), filename: _selectedImageFile!.path.split('/').last));
+    // Ajouter l'image en tant que champ de formulaire ordinaire avec la chaîne base64
+    request.fields['image'] = base64Image;
 
     request.headers['Authorization'] = 'Bearer $token';
 
     try {
       final response = await request.send();
       print(response.statusCode);
+      print(response);
+
       print(token);
 
       if (response.statusCode == 200) {
@@ -158,6 +165,7 @@ class _DepositScreenState extends State<DepositScreen> {
       });
     }
   }
+
 
   void showErrorMessage(String message) {
     final snackBar = SnackBar(
@@ -293,6 +301,7 @@ class _DepositScreenState extends State<DepositScreen> {
                             ),
                           ),
                           child: Text('Annuler'),
+
                         ),
                         ElevatedButton(
                           onPressed: () async {
