@@ -50,7 +50,6 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _hasNextPage = false;
   bool _allSlidesSeen = false;
 
-
   // Déclarez une variable pour suivre l'index de la diapositive actuelle
   int _currentPageIndex = 0;
 
@@ -65,7 +64,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
-
 
   late Statistics statistics =
   Statistics(totalReports: 0, resolvedReports: 0, ongoingReports: 0, reportedReports: 0);
@@ -165,16 +163,6 @@ class _HomeScreenState extends State<HomeScreen> {
       icon: Icons.mobile_screen_share,
     ),
     Slide(
-      title: "Statistiques des signalements",
-      description: "Consultez les statistiques en temps réel sur les signalements : total, résolus, en cours et signalés.",
-      icon: Icons.insert_chart_outlined,
-    ),
-    Slide(
-      title: "Historique des signalements",
-      description: "Explorez l'historique détaillé des signalements avec leurs états et leurs détails.",
-      icon: Icons.history,
-    ),
-    Slide(
       title: "Effectuer un signalement",
       description: "Signalez facilement les problèmes en prenant des photos et en fournissant des détails pour une action rapide.",
       icon: Icons.report_problem,
@@ -188,6 +176,16 @@ class _HomeScreenState extends State<HomeScreen> {
       title: "Visualiser sur la carte",
       description: "Explorez les signalements sur une carte interactive pour une vue d'ensemble géographique.",
       icon: Icons.map,
+    ),
+    Slide(
+      title: "Historique des signalements",
+      description: "Explorez l'historique détaillé des signalements avec leurs états et leurs détails.",
+      icon: Icons.history,
+    ),
+    Slide(
+      title: "Statistiques des signalements",
+      description: "Consultez les statistiques en temps réel sur les signalements : total, résolus, en cours et signalés.",
+      icon: Icons.insert_chart_outlined,
     ),
   ];
 
@@ -216,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white, // Blanc
+                backgroundColor : Colors.white, // Blanc
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -226,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Positioned(
-            bottom: 180,
+            bottom: 110,
             left: 0,
             right: 0,
             child: Row(
@@ -238,7 +236,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
 
   Widget _buildSlide(Slide slide) {
     return Container(
@@ -272,6 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
               fontWeight: FontWeight.bold,
               color: Color(0xFF1B5E20), // Vert foncé
             ),
+            textAlign: TextAlign.center,
           ),
           SizedBox(height: 10),
           Container(
@@ -314,16 +312,18 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } else {
       // Affichez un message à l'utilisateur pour lui indiquer de voir tous les slides.
-
       ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar
-        (
-           content: Text('Veuillez parcourir tous les slides avant de continuer.'),
+        SnackBar(
+          content: Text('Veuillez parcourir tous les slides avant de continuer.', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.black, // Couleur de fond de la SnackBar
+          elevation: 8, // Élévation pour ajouter une ombre
+          behavior: SnackBarBehavior.floating, // Centrer le SnackBar
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)), // Coins arrondis
         ),
       );
+
     }
   }
-
 
   void _showSlidesAgain() async {
     await _prefs.setBool('hasSeenSlides', false);
@@ -527,11 +527,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-
-
-
-
-
   void _updateScrollIndicatorPosition(double position) {
     setState(() {
       _lastScrollIndicatorPosition = position;
@@ -702,6 +697,7 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: signalements.length,
       itemBuilder: (BuildContext context, int index) {
         final signalement = signalements[index];
+
         final monSignal = signalement['id'];
 
         IconData iconData;
@@ -887,4 +883,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
 

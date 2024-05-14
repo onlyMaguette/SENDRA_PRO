@@ -15,14 +15,7 @@ class BottomNavigationController extends GetxController {
       icon: Icon(FontAwesomeIcons.car),
       label: Strings.home,
     ),
-    /*BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.wallet),
-      label: Strings.wallet,
-    ),*/
-    /*BottomNavigationBarItem(
-      icon: Icon(FontAwesomeIcons.bell,),
-      label: Strings.notification,
-    ),*/
+
     BottomNavigationBarItem(
       icon: Icon(
         FontAwesomeIcons.mapLocation,

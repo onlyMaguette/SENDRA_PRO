@@ -28,15 +28,17 @@ class AboutUsScreen extends StatelessWidget {
     );
   }
 
-  ListView _bodyWidget(BuildContext context) {
-    return ListView(
-      children: [
-        addVerticalSpace(20.h),
-        _imageWidget(context),
-        addVerticalSpace(20.h),
-        _aboutUsDescription(context),
-        _copyRightWidget(context)
-      ],
+  Widget _bodyWidget(BuildContext context) {
+    return Scrollbar(
+      child: ListView(
+        children: [
+          addVerticalSpace(20.h),
+          _imageWidget(context),
+          addVerticalSpace(20.h),
+          _aboutUsDescription(context),
+          _copyRightWidget(context)
+        ],
+      ),
     );
   }
 
@@ -54,8 +56,25 @@ class AboutUsScreen extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(Dimensions.marginSize * 0.5),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /*Text(
+          Text(
+            'Conditions Générales d\'Utilisation (CGU)',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              shadows: [
+                Shadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  blurRadius: 2,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
+          addVerticalSpace(20.h),
+          Text(
             Strings.aboutUsPartOne,
             textAlign: TextAlign.justify,
             style: CustomStyler.aboutUsDesStyle,
@@ -77,7 +96,33 @@ class AboutUsScreen extends StatelessWidget {
             Strings.aboutUsPartFour,
             textAlign: TextAlign.justify,
             style: CustomStyler.aboutUsDesStyle,
-          ),*/
+          ),
+          addVerticalSpace(20.h),
+          Text(
+            'Rappel de l\'Usage et de la Destination de l\'Application',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              shadows: [
+                Shadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  blurRadius: 2,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
+          addVerticalSpace(20.h),
+          Text(
+            'Notre application de gestion des signalements simplifie le processus de signalement et de suivi des incidents. Avec une interface conviviale, des performances optimales et un stockage sécurisé des données, les utilisateurs peuvent signaler et suivre les incidents avec facilité. Notre application offre une expérience fluide et efficace pour gérer les signalements, améliorant ainsi la gestion des problèmes dans la communauté.',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Colors.black87,
+              wordSpacing: -1,
+            ),
+            textAlign: TextAlign.justify,
+          ),
         ],
       ),
     );
@@ -85,18 +130,19 @@ class AboutUsScreen extends StatelessWidget {
 
   Container _copyRightWidget(BuildContext context) {
     return Container(
-        alignment: Alignment.center,
-        child: Column(
-          children: [
-            Text(
-              Strings.copyright,
-              style: CustomStyler.copyrightStyle,
-            ),
-            Text(
-              Strings.websiteLink,
-              style: CustomStyler.websiteStyle,
-            ),
-          ],
-        ));
+      alignment: Alignment.center,
+      child: Column(
+        children: [
+          Text(
+            Strings.copyright,
+            style: CustomStyler.copyrightStyle,
+          ),
+          Text(
+            Strings.websiteLink,
+            style: CustomStyler.websiteStyle,
+          ),
+        ],
+      ),
+    );
   }
 }

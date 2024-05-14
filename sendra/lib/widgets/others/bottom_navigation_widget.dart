@@ -30,11 +30,12 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
         backgroundColor: CustomColor.primaryBackgroundColor,
         body: mainScreens[_controller.getIndex()],
         bottomNavigationBar: BottomAppBar(
-          shape: const CircularNotchedRectangle(),
+          padding: const EdgeInsets.only(bottom: 0.0),
+          //shape: const CircularNotchedRectangle(),
           color: CustomColor.primaryBackgroundColor,
           clipBehavior: Clip.hardEdge,
           notchMargin: 6,
-          height: kBottomNavigationBarHeight + 50,
+          //height: kBottomNavigationBarHeight + 50,
 
           child: BottomNavigationBar(
             onTap: (index) => _controller.setIndex(index),
