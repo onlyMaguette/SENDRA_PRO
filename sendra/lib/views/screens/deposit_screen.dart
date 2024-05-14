@@ -100,6 +100,10 @@ class _DepositScreenState extends State<DepositScreen> {
   }
 
   Future<void> _submitImage(String token) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
     if (token == null) {
@@ -110,7 +114,14 @@ class _DepositScreenState extends State<DepositScreen> {
       return;
     }
 
-    // Convertir l'image en base64
+    if (_selectedImageFile == null) {
+      print('Aucune image sélectionnée.');
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
     List<int> imageBytes = await _selectedImageFile!.readAsBytes();
     String base64Image = base64.encode(imageBytes);
 
@@ -123,18 +134,11 @@ class _DepositScreenState extends State<DepositScreen> {
     request.fields['commune'] = '$locality';
     request.fields['latitude'] = '$latitude';
     request.fields['longitude'] = '$longitude';
-
-    // Ajouter l'image en tant que champ de formulaire ordinaire avec la chaîne base64
     request.fields['image'] = base64Image;
-
     request.headers['Authorization'] = 'Bearer $token';
 
     try {
       final response = await request.send();
-      print(response.statusCode);
-      print(response);
-
-      print(token);
 
       if (response.statusCode == 200) {
         setState(() {
@@ -142,7 +146,6 @@ class _DepositScreenState extends State<DepositScreen> {
           _controller.titreController.text = '';
         });
 
-        // Show confirmation snackbar
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Votre signalement a été pris en compte !'),
@@ -151,13 +154,12 @@ class _DepositScreenState extends State<DepositScreen> {
           ),
         );
 
-        // Navigate to the specified route
         Get.toNamed(Routes.bottomNavigationScreen);
       } else {
         print('Erreur lors de la signalisation');
       }
     } catch (e) {
-      print('Erreur lors de la connexion au serveur');
+      print('Erreur lors de la connexion au serveur: $e');
       showErrorMessage('Une erreur s’est produite: $e');
     } finally {
       setState(() {
@@ -165,7 +167,6 @@ class _DepositScreenState extends State<DepositScreen> {
       });
     }
   }
-
 
   void showErrorMessage(String message) {
     final snackBar = SnackBar(
@@ -232,30 +233,32 @@ class _DepositScreenState extends State<DepositScreen> {
       _selectedImageFile = File(pickedFile.path);
     });
 
-    // Show preview dialog
+    _confirmImageSelection();
+  }
+
+  void _confirmImageSelection() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        // Variable pour suivre l'état de chargement
         bool isLoading = false;
 
         return StatefulBuilder(
           builder: (BuildContext context, setState) {
             return Center(
               child: isLoading
-                  ? CircularProgressIndicator() // Afficher l'indicateur de chargement si isLoading est vrai
+                  ? CircularProgressIndicator()
                   : AlertDialog(
                 title: Text(
                   'Confirmation',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.green, // Couleur bleue pour le titre
+                    color: Colors.green,
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0), // Coins arrondis
+                  borderRadius: BorderRadius.circular(20.0),
                 ),
                 content: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -263,8 +266,8 @@ class _DepositScreenState extends State<DepositScreen> {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(20.0),
                       child: Container(
-                        width: 200.0, // Ajustez la largeur de l'image comme vous le souhaitez
-                        height: 200.0, // Ajustez la hauteur de l'image comme vous le souhaitez
+                        width: 200.0,
+                        height: 200.0,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(20.0),
                           boxShadow: [
@@ -283,7 +286,7 @@ class _DepositScreenState extends State<DepositScreen> {
                     Text(
                       'Confirmez-vous la sélection de cette image ?',
                       style: TextStyle(
-                        fontWeight: FontWeight.bold, // Texte en gras
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                     SizedBox(height: 10),
@@ -292,24 +295,23 @@ class _DepositScreenState extends State<DepositScreen> {
                       children: [
                         ElevatedButton(
                           onPressed: () {
-                            Navigator.of(context).pop(); // Fermer la boîte de dialogue
+                            Navigator.of(context).pop();
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red, // Changer la couleur du bouton en rouge
+                            backgroundColor: Colors.red,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
                           ),
                           child: Text('Annuler'),
-
                         ),
                         ElevatedButton(
                           onPressed: () async {
                             setState(() {
-                              isLoading = true; // Définir isLoading à true pour afficher l'indicateur de chargement
+                              isLoading = true;
                             });
                             showDialog(
-                              barrierDismissible: false, // Empêche la fermeture du dialog en cliquant en dehors de celui-ci
+                              barrierDismissible: false,
                               context: context,
                               builder: (context) {
                                 return AlertDialog(
@@ -321,7 +323,7 @@ class _DepositScreenState extends State<DepositScreen> {
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
                                       CircularProgressIndicator(
-                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue), // Couleur du spinner
+                                        valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                                       ),
                                       SizedBox(height: 16),
                                       Text(
@@ -347,44 +349,18 @@ class _DepositScreenState extends State<DepositScreen> {
                               },
                             );
                             _submitImage('token');
-                            // Ne pas fermer la boîte de dialogue ici, elle devrait probablement être fermée une fois que le processus de soumission est terminé.
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.green, // Changer la couleur du bouton en BlueGrey
+                            backgroundColor: Colors.green,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10.0), // Bordures arrondies pour le bouton
+                              borderRadius: BorderRadius.circular(10.0),
                             ),
                           ),
-                          child: isLoading
-                              ? Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SizedBox(
-                                width: 24, // Ajustez la largeur pour le spinner
-                                height: 24, // Ajustez la hauteur pour le spinner
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white), // Couleur du spinner
-                                ),
-                              ),
-                              SizedBox(height: 8), // Espacement entre le spinner et le texte
-                              Text(
-                                'Signalement en cours...',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          )
-                              : Text(
+                          child: Text(
                             'Confirmer',
                             style: TextStyle(color: Colors.white),
                           ),
                         ),
-
-
-
-
                       ],
                     ),
                   ],
@@ -485,27 +461,22 @@ class _DepositScreenState extends State<DepositScreen> {
           child: ElevatedButton(
             onPressed: () {
               if (!_isLoading) {
-                // Vérifier si le chargement est déjà en cours
                 if (_controller.formKey.currentState!.validate()) {
-                  setState(() {
-                    _isLoading = false; // Définir l'état de chargement sur vrai
-                  });
-                  _selectImage(); // Appel à la méthode de sélection de l'image
+                  _selectImage();
                 }
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: CustomColor.primaryColor, // couleur de fond du bouton
-              foregroundColor: CustomColor.whiteColor, // couleur du texte
+              backgroundColor: CustomColor.primaryColor,
+              foregroundColor: CustomColor.whiteColor,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0), // bordure arrondie
+                borderRadius: BorderRadius.circular(10.0),
               ),
-              elevation: 3, // élévation pour ajouter de la profondeur
-              padding: EdgeInsets.symmetric(vertical: 12.0), // ajuster le rembourrage vertical
+              elevation: 3,
+              padding: EdgeInsets.symmetric(vertical: 12.0),
             ),
-            child:_isLoading
+            child: _isLoading
                 ? SizedBox(
-              // Afficher un spinner si le chargement est en cours
               width: 24.0,
               height: 24.0,
               child: CircularProgressIndicator(
@@ -520,19 +491,19 @@ class _DepositScreenState extends State<DepositScreen> {
                   size: 24.0,
                   color: Colors.white,
                 ),
-                SizedBox(width: 10.0), // espace supplémentaire entre l'icône et le texte
+                SizedBox(width: 10.0),
                 Text(
                   Strings.signaler,
                   style: TextStyle(
                     fontSize: 16.0,
-                    fontWeight: FontWeight.bold, // rendre le texte en gras
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
             ),
           ),
         ),
-        SizedBox(height: 10.0), // ajouter un espace vertical
+        SizedBox(height: 10.0),
         Text(
           'Cliquez sur "Signaler" pour prendre une photo',
           style: TextStyle(
