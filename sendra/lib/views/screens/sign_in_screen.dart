@@ -190,13 +190,13 @@ class _SignInScreenState extends State<SignInScreen> {
           children: [
             _backButton(context),
             _titleAndDesWidget(context),
-            SizedBox(height: 20.h),
+            SizedBox(height: 0.h),
             _inputWidgets(context),
-            SizedBox(height: 10.h),
+            SizedBox(height: 0.h),
             _signInButtonWidget(context),
-            SizedBox(height: 5.h),
+            SizedBox(height: 18.h),
             _forgotPasswordWidget(context),
-            SizedBox(height: 5.h),
+            SizedBox(height: 0.h),
             _signUpWidget(context),
           ],
         ),
@@ -229,7 +229,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _titleAndDesWidget(BuildContext context) {
     return Container(
-      margin: EdgeInsets.all(Dimensions.marginSize),
+      margin: EdgeInsets.symmetric(horizontal: Dimensions.marginSize), // Ajustez la marge horizontale selon vos besoins
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -326,7 +326,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _forgotPasswordWidget(BuildContext context) {
     return Container(
       alignment: Alignment.center,
-      margin: EdgeInsets.only(top: 5.h),
+      margin: EdgeInsets.only(top: 53.h),
       child: GestureDetector(
         onTap: () {
           _forgotPasswordScreen(context);
@@ -346,7 +346,7 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget _signUpWidget(BuildContext context) {
     return Container(
       alignment: Alignment.bottomCenter,
-      margin: EdgeInsets.all(Dimensions.marginSize),
+      margin: EdgeInsets.all(Dimensions.marginSize * 0.9),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
