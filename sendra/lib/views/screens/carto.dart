@@ -30,11 +30,9 @@ class _CartoScreenState extends State<CartoScreen> {
       Uri.parse(Strings.apiURI + 'listerSignalements'),
     );
 
-    print(response.body);
     if (response.statusCode == 200) {
       Map<String, dynamic> responseData = json.decode(response.body);
       List<dynamic> jsonResponse = responseData['data'];
-      print(jsonResponse);
       setState(() {
         signalements = List<Map<String, dynamic>>.from(jsonResponse);
       });
@@ -65,7 +63,7 @@ class _CartoScreenState extends State<CartoScreen> {
 class SignalementMap extends StatelessWidget {
   final List<Map<String, dynamic>> signalements;
 
-  SignalementMap({required this.signalements});
+  const SignalementMap({required this.signalements});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +72,7 @@ class SignalementMap extends StatelessWidget {
         center: LatLng(14.7488, -17.3909), // Pikine's coordinates
         zoom: 10, // Zoom level
       ),
-      children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
+      children: [
         TileLayer(
           urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
         ),
@@ -98,7 +96,6 @@ class SignalementMap extends StatelessWidget {
                     return AlertDialog(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(16.0),
-                        // Bordures arrondies
                       ),
                       title: Text(
                         '${signalement['titre']}',
@@ -106,8 +103,9 @@ class SignalementMap extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      content: ListView(
-                        shrinkWrap: true,
+                      content: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             'Commune : ${signalement['commune']}',
@@ -124,6 +122,7 @@ class SignalementMap extends StatelessWidget {
                           SizedBox(height: 20),
                           GestureDetector(
                             onTap: () {
+                              Navigator.pop(context); // Close the dialog
                               Navigator.pushNamed(
                                 context,
                                 '/depositMoneyDetailsScreen',
@@ -135,9 +134,7 @@ class SignalementMap extends StatelessWidget {
                                   vertical: 8.0, horizontal: 16.0),
                               decoration: BoxDecoration(
                                 color: Colors.green,
-                                borderRadius:
-                                BorderRadius.circular(8.0),
-                                // Bordures arrondies pour le bouton
+                                borderRadius: BorderRadius.circular(8.0),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -145,7 +142,6 @@ class SignalementMap extends StatelessWidget {
                                   Icon(
                                     Icons.remove_red_eye,
                                     color: Colors.white,
-                                    // Couleur de l'icône en blanc
                                   ),
                                   SizedBox(width: 8),
                                   Text(
@@ -153,7 +149,6 @@ class SignalementMap extends StatelessWidget {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
-                                      // Couleur du texte en blanc
                                       fontSize: 16,
                                     ),
                                   ),
@@ -170,17 +165,14 @@ class SignalementMap extends StatelessWidget {
               child: Icon(
                 Icons.location_on,
                 color: _getMarkerColor(signalement['etat']),
-                // Couleur basée sur l'état du signalement
               ),
             ),
-
           ))
               .toList(),
         ),
       ],
     );
   }
-
 
   Color _getMarkerColor(String etat) {
     switch (etat) {
@@ -190,7 +182,6 @@ class SignalementMap extends StatelessWidget {
         return Colors.orange;
       case 'ENLEVE':
         return Colors.green;
-    // Couleur orange pour l'état EN_COURS
       default:
         return Colors.black;
     }
