@@ -781,13 +781,18 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                             ),
                             SizedBox(height: 5),
-                            Text(
-                              signalement['commune'] ?? '',
-                              style: TextStyle(
-                                color: Colors.grey[800],
-                                fontSize: 16,
+                            Flexible(
+                              child: Text(
+                                signalement['commune'] ?? '',
+                                style: TextStyle(
+                                  color: Colors.grey[800],
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
                               ),
                             ),
+
                             SizedBox(height: 5),
                             Row(
                               children: [
