@@ -67,7 +67,7 @@ class AboutUsScreen extends StatelessWidget {
               shadows: [
                 Shadow(
                   color: Colors.grey.withOpacity(0.5),
-                  blurRadius: 3,
+                  blurRadius: 2,
                   offset: Offset(2, 2),
                 ),
               ],
