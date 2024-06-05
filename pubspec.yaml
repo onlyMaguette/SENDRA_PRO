@@ -33,11 +33,11 @@ dependencies:
 
   flutter_map: ^6.1.0
   latlong2: #geolocator: ^7.1.1
-  geolocator: ^11.0.0
+  geolocator: ^12.0.0
   geocoding: ^3.0.0
   location:
   fluttertoast: ^8.0.7
-  firebase_auth: ^4.7.1
+  firebase_auth: ^5.0.0
   shared_preferences: ^2.0.12  # Use the latest version
   
   
@@ -58,7 +58,7 @@ dependencies:
   csc_picker: ^0.2.6
   pin_code_fields: ^8.0.1
   permission_handler: any
-  firebase_core: ^2.15.0
+  firebase_core: ^3.0.0
   image: ^4.0.15
   path_provider: ^2.0.5
 
