@@ -59,7 +59,7 @@ class AboutUsScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Conditions Générales d\'Utilisation (CGU)',
+            'I.	Conditions Générales d\'Utilisation (CGU)',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
@@ -87,6 +87,21 @@ class AboutUsScreen extends StatelessWidget {
           ),
           addVerticalSpace(20.h),
           Text(
+            'II.	Protection de la Vie Privée',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+              shadows: [
+                Shadow(
+                  color: Colors.grey.withOpacity(0.5),
+                  blurRadius: 2,
+                  offset: Offset(2, 2),
+                ),
+              ],
+            ),
+          ),
+          Text(
             Strings.aboutUsPartThree,
             textAlign: TextAlign.justify,
             style: CustomStyler.aboutUsDesStyle,
@@ -98,8 +113,9 @@ class AboutUsScreen extends StatelessWidget {
             style: CustomStyler.aboutUsDesStyle,
           ),
           addVerticalSpace(20.h),
+
           Text(
-            'Rappel de l\'Usage et de la Destination de l\'Application',
+            'III.  Rappel de l\'Usage et de la Destination de l\'Application',
             style: TextStyle(
               fontSize: 16.sp,
               fontWeight: FontWeight.bold,
