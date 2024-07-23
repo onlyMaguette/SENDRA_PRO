@@ -1,19 +1,13 @@
 import 'dart:convert';
 
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
-import 'package:latlong2/latlong.dart';
+import 'package:walletium/controller/deposit_controller.dart';
 import 'package:walletium/controller/deposit_money_details_controller.dart';
-import 'package:walletium/utils/custom_color.dart';
-import 'package:walletium/utils/size.dart';
 import 'package:walletium/utils/strings.dart';
-import 'package:walletium/widgets/others/back_button_widget.dart';
-
-import '../../controller/deposit_controller.dart';
 
 class DepositMoneyDetailsScreen extends StatefulWidget {
   DepositMoneyDetailsScreen({Key? key}) : super(key: key);
@@ -29,15 +23,16 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
 
   late Future<Map<String, dynamic>> signalementDataFuture = Future.value({});
   bool isLoading = true;
+  Map<String, dynamic> signalementData = {};
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       fetchSignalementData();
-      //getUserData();
     });
   }
+
   Future<Map<String, dynamic>> fetchSignalementDetails(int signalementId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -52,13 +47,9 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
 
     if (response.statusCode == 200) {
       final jsonResponse = jsonDecode(response.body);
-      // Vérifier si la clé "data" existe dans la réponse JSON
       if (jsonResponse.containsKey('data')) {
-        // Accéder à la liste associée à la clé "data"
         final dataList = jsonResponse['data'];
-        // Vérifier si la liste contient au moins un élément
         if (dataList.isNotEmpty) {
-          // Récupérer le premier élément de la liste
           final data = dataList[0];
           return data;
         } else {
@@ -72,17 +63,16 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
     }
   }
 
-
   Future<void> fetchSignalementData() async {
     try {
       final signalementId = ModalRoute.of(context)!.settings.arguments.toString();
       signalementDataFuture = fetchSignalementDetails(int.parse(signalementId));
+      signalementData = await signalementDataFuture;
       setState(() {
         isLoading = false;
       });
     } catch (e) {
-      // Handle error
-      print('Erreurr: $e');
+      print('Erreur: $e');
       setState(() {
         isLoading = false;
       });
@@ -94,13 +84,14 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          Strings.details,
-          style: TextStyle(color: CustomColor.whiteColor),
+          'Constatation',
+          style: TextStyle(color: Colors.white),
         ),
-        leading: const BackButtonWidget(
-          backButtonImage: Strings.backButtonWhite,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        backgroundColor: CustomColor.primaryColor,
+        backgroundColor: Colors.green,
         elevation: 0,
       ),
       body: isLoading
@@ -128,12 +119,81 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _detailsWidget(signalementData),
-          SizedBox(height: 20.h),
-          _MapWidget(signalementData),
-          SizedBox(height: 20.h),
-          _ImageDetailWidget(signalementData),
+          _localisationButton(),
+          _menuItem('Informations de base', signalementData),
+          _menuItem('Véhicule'),
+          _menuItem('Infraction'),
+          _menuItem('Dommages'),
+          _menuItem('Approbation'),
+          _menuItem('Enlèvement'),
         ],
+      ),
+    );
+  }
+
+  Widget _localisationButton() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton.icon(
+        onPressed: () {
+          // Ajouter ici l'action pour le bouton de localisation
+        },
+        icon: Icon(Icons.location_on),
+        label: Text('Localisation'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.green,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(vertical: 16.0),
+          textStyle: TextStyle(fontSize: 18.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _menuItem(String title, [Map<String, dynamic>? signalementData]) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Card(
+        elevation: 2.0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: ListTile(
+          title: Text(title),
+          trailing: Icon(Icons.arrow_forward_ios),
+          onTap: () {
+            if (title == 'Informations de base') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => BasicInfoForm(
+                  signalementData: signalementData!,
+                ),
+              ));
+            } else if (title == 'Véhicule') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => VehicleForm(),
+              ));
+            } else if (title == 'Infraction') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => InfractionForm(),
+              ));
+            } else if (title == 'Dommages') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => DamagesForm(),
+              ));
+            } else if (title == 'Approbation') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => ApprovalForm(),
+              ));
+            } else if (title == 'Enlèvement') {
+              Navigator.of(context).push(MaterialPageRoute(
+                builder: (context) => RemovalForm(),
+              ));
+            }
+          },
+        ),
       ),
     );
   }
@@ -147,7 +207,7 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
   Widget _buildError() {
     return Center(
       child: Text(
-        'Echec du chargement des détails du signalement.',
+        'Échec du chargement des détails du signalement.',
         style: TextStyle(
           color: Colors.red,
           fontSize: 16.0,
@@ -156,238 +216,784 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
       ),
     );
   }
+}
 
-  Widget _ImageDetailWidget(Map<String, dynamic> signalementData) {
-    final imageUrl = signalementData['image_url'];
+class BasicInfoForm extends StatelessWidget {
+  final Map<String, dynamic> signalementData;
 
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16.0),
-        child: Hero(
-          tag: imageUrl, // Utilisez une URL unique comme tag
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12.0),
-            child: GestureDetector(
-              onTap: () {
-                // Naviguer vers l'écran de l'image en plein écran
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => FullScreenImage(imageUrl: imageUrl),
-                  ),
-                );
-              },
-              child: Image.network(
-                imageUrl,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                height: 300.0,
-              ),
-            ),
-          ),
+  BasicInfoForm({required this.signalementData});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Informations de base',
+          style: TextStyle(color: Colors.white),
         ),
-      );
-    } else {
-      return Placeholder(
-        fallbackHeight: 200.0,
-        fallbackWidth: double.infinity,
-      );
-    }
-  }
-
-  Widget _MapWidget(Map<String, dynamic> signalementData) {
-    final latitude = double.parse(signalementData['latitude'] ?? '0.0');
-    final longitude = double.parse(signalementData['longitude'] ?? '0.0');
-    final etat = signalementData['etat'] as String?;
-
-    // Définir la couleur du marqueur en fonction de l'état
-    Color markerColor;
-    switch (etat) {
-      case 'SIGNALE':
-        markerColor = Colors.red;
-        break;
-      case 'EN COURS':
-        markerColor = Colors.orange;
-        break;
-      case 'ENLEVE':
-        markerColor = Colors.green;
-        break;
-      default:
-        markerColor = Colors.black; // Couleur par défaut si l'état n'est pas défini
-    }
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      child: Card(
-        elevation: 4.0,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: ListView(
           children: [
-            Container(
-              height: 200.0,
-              child: FlutterMap(
-                options: MapOptions(
-                  center: LatLng(latitude, longitude),
-                  zoom: 13.0,
-                ),
-                children: [ // Utilisation du paramètre children pour spécifier les couches de la carte
-                  TileLayer(
-                    urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  ),
-                  MarkerLayer(
-                    markers: [
-                      Marker(
-                        width: 40.0,
-                        height: 40.0,
-                        point: LatLng(latitude, longitude),
-                        child: Container(
-                          child: Icon(
-                            Icons.location_on,
-                            color: markerColor,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Carte de localisation',
-                    style: TextStyle(
-                      fontSize: 18.0,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Zoomez pour voir l\'emplacement',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildImageContainer(signalementData['image_url'], context),
+            _buildReadOnlyField('Titre', signalementData['titre']),
+            _buildReadOnlyField('Commune', signalementData['commune']),
+            _buildReadOnlyField('Date et heure du signalement', signalementData['formatted_date']),
+            //    _buildReadOnlyField('Nom Auteur', signalementData['nomAuteur']),
+            //    _buildReadOnlyField('Prenom Auteur', signalementData['prenomAuteur']),
           ],
         ),
       ),
     );
   }
 
-  Widget _detailsWidget(Map<String, dynamic> signalementData) {
-    final titre = signalementData['titre'] as String?;
-    final commune = signalementData['commune'] as String?;
-    final etat = signalementData['etat'] as String?;
-
+  Widget _buildReadOnlyField(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Titre avec une police en gras et une couleur vive
-          Text(
-            titre ?? '',
-            style: TextStyle(
-              fontSize: 24.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.black, // Exemple de couleur vive
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        initialValue: value,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        readOnly: true,
+      ),
+    );
+  }
+
+  Widget _buildImageContainer(String imageUrl, BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (_) => Dialog(
+            child: Container(
+              padding: EdgeInsets.all(16.0),
+              child: Image.network(imageUrl),
             ),
           ),
-          SizedBox(height: 8),
-          // Commune avec une police plus légère
-          Text(
-            commune ?? '',
-            style: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-              color: Colors.blueGrey, // Exemple de couleur plus légère
-            ),
+        );
+      },
+      child: Container(
+        width: 250,
+        height: 250,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            imageUrl,
+            fit: BoxFit.fill,
           ),
-          SizedBox(height: 16),
-          // État avec une icône et une couleur correspondante
-          Row(
-            children: [
-              if (etat == 'ENLEVE')
-                Icon(
-                  Icons.check_circle,
-                  color: Colors.green,
-                )
-              else if (etat == 'EN COURS') // Nouvelle condition pour l'état en cours
-                Icon(
-                  Icons.pending_actions,
-                  color: Colors.orange,
-                )
-              else
-                Icon(
-                  Icons.warning,
-                  color: Colors.red,
-                ),
-              SizedBox(width: 8),
-              Text(
-                etat == 'ENLEVE'
-                    ? 'Résolu'
-                    : etat == 'EN COURS' // Nouvelle condition pour l'état en cours
-                    ? 'En cours'
-                    : 'Signalé',
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                  color: etat == 'EN COURS' // Nouvelle condition pour l'état en cours
-                      ? Colors.orange
-                      : null,
-                ),
-              ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// Nouvel écran pour afficher l'image en plein écran
-class FullScreenImage extends StatelessWidget {
-  final String imageUrl;
 
-  const FullScreenImage({required this.imageUrl});
+
+class VehicleForm extends StatefulWidget {
+  @override
+  _VehicleFormState createState() => _VehicleFormState();
+}
+
+class _VehicleFormState extends State<VehicleForm> {
+  final _formKey = GlobalKey<FormState>(); // Key for the form
+  String? _etatGeneral;
+  String? _paysEtranger;
+  Map<String, bool> _details = {
+    'Défaut de contrôle technique': false,
+    'Véhicule immergé au dessus du tableau de bord': false,
+    'Véhicule définitivement non identifiable': false,
+    'Coque ou Chassis ni réparable ni remplaçable': false,
+    'Pneumatiques manquantes': false,
+    'Défauts techniques irréversibles et non remplaçables': false,
+    'Véhicule complètement brûlé': false,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*
       appBar: AppBar(
-        // Ajoutez un bouton de retour dans l'appBar
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+        title: Text(
+          'Véhicule',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildField('Numéro du véhicule', 'Ce champ est obligatoire'),
+              _buildField('Marque', 'Ce champ est obligatoire'),
+              _buildField('Type', 'Ce champ est obligatoire'),
+              _buildField('Modèle', 'Ce champ est obligatoire'),
+              _buildField('Catégorie du véhicule', 'Ce champ est obligatoire'),
+              _buildField('Couleur', 'Ce champ est obligatoire'),
+              SizedBox(height: 20),
+              Text('État général :', style: TextStyle(fontSize: 16)),
+              _buildRadioGroup(
+                'État général',
+                ['BON', 'MOYEN', 'DEGRADE'],
+                _etatGeneral,
+                    (value) {
+                  setState(() {
+                    _etatGeneral = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              Text('Pays étranger :', style: TextStyle(fontSize: 16)),
+              _buildRadioGroup(
+                'Pays étranger',
+                ['OUI', 'NON'],
+                _paysEtranger,
+                    (value) {
+                  setState(() {
+                    _paysEtranger = value;
+                  });
+                },
+              ),
+              SizedBox(height: 20),
+              Text('Détails :', style: TextStyle(fontSize: 16)),
+              ..._details.keys.map((detail) {
+                return CheckboxListTile(
+                  title: Text(detail),
+                  value: _details[detail],
+                  onChanged: (value) {
+                    setState(() {
+                      _details[detail] = value ?? false;
+                    });
+                  },
+                  activeColor: Colors.green, // Color when selected
+                );
+              }).toList(),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    // Action à réaliser lors de l'appui sur le bouton Enregistrer
+                  }
+                },
+                child: Text('Enregistrer'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: TextStyle(fontSize: 18.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
+    );
+  }
 
-       */
-      backgroundColor: Colors.black,
-      body: Center(
-        child: Hero(
-          tag: imageUrl,
-          child: Image.network(
-            imageUrl,
-            fit: BoxFit.contain,
-            // Assurez-vous que l'image est centrée et remplie l'écran
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
+  Widget _buildField(String label, String errorMessage) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0), // Rounded corners
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0), // Rounded corners
+            borderSide: BorderSide(color: Colors.grey, width: 1.0),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0), // Rounded corners
+            borderSide: BorderSide(color: Colors.deepPurple, width: 2.0),
+          ),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return errorMessage; // Error message
+          }
+          return null; // Validation successful
+        },
+      ),
+    );
+  }
+
+  Widget _buildRadioGroup(String label, List<String> options, String? groupValue, Function(String?) onChanged) {
+    return FormField<String>(
+      validator: (value) {
+        if (groupValue == null) {
+          return 'Ce champ est obligatoire'; // Error message when no option is selected
+        }
+        return null; // Validation successful
+      },
+      builder: (state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: options.map((option) {
+                return Expanded(
+                  child: RadioListTile<String>(
+                    title: Text(option),
+                    value: option,
+                    groupValue: groupValue,
+                    onChanged: (value) {
+                      onChanged(value);
+                      state.didChange(value); // Update validation state
+                    },
+                    activeColor: Colors.green, // Color when selected
+                  ),
+                );
+              }).toList(),
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  state.errorText!,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+
+class InfractionForm extends StatefulWidget {
+  @override
+  _InfractionFormState createState() => _InfractionFormState();
+}
+
+class _InfractionFormState extends State<InfractionForm> {
+  final _formKey = GlobalKey<FormState>(); // Clé pour le formulaire
+  bool _isSubmitting = false; // Variable pour suivre l'état de la soumission
+
+  String? _lieu; // Variable pour stocker la sélection du lieu
+  String? _meteo; // Variable pour stocker la sélection de la météo
+  String? _adresse; // Variable pour stocker l'adresse
+  String? _motif; // Variable pour stocker le motif
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Infraction',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildField('Adresse précise', (value) {
+                if (value == null || value.isEmpty) {
+                  return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                }
+                _adresse = value;
+                return null;
+              }),
+              _buildField('Motif de l\'infraction', (value) {
+                if (value == null || value.isEmpty) {
+                  return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                }
+                _motif = value;
+                return null;
+              }),
+
+              SizedBox(height: 20),
+              Text('Lieu :', style: TextStyle(fontSize: 16)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('PUBLIC'),
+                      value: 'PUBLIC',
+                      groupValue: _lieu,
+                      onChanged: (value) {
+                        setState(() {
+                          _lieu = value;
+                        });
+                      },
+                      activeColor: Colors.green, // Color when selected
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('PRIVE'),
+                      value: 'PRIVE',
+                      groupValue: _lieu,
+                      onChanged: (value) {
+                        setState(() {
+                          _lieu = value;
+                        });
+                      },
+                      activeColor: Colors.green, // Color when selected
+                    ),
+                  ),
+                ],
+              ),
+              if (_isSubmitting && _lieu == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Ce champ est obligatoire',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+
+              SizedBox(height: 20),
+              Text('Météo :', style: TextStyle(fontSize: 16)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('Nuit'),
+                      value: 'Nuit',
+                      groupValue: _meteo,
+                      onChanged: (value) {
+                        setState(() {
+                          _meteo = value;
+                        });
+                      },
+                      activeColor: Colors.green, // Color when selected
+                    ),
+                  ),
+                  Expanded(
+                    child: RadioListTile<String>(
+                      title: Text('Pluie'),
+                      value: 'Pluie',
+                      groupValue: _meteo,
+                      onChanged: (value) {
+                        setState(() {
+                          _meteo = value;
+                        });
+                      },
+                      activeColor: Colors.green, // Color when selected
+                    ),
+                  ),
+                ],
+              ),
+              if (_isSubmitting && _meteo == null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    'Ce champ est obligatoire',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isSubmitting = true; // Marquer comme étant en soumission
+                  });
+                  if (_formKey.currentState!.validate() && _lieu != null && _meteo != null) {
+                    // Action à réaliser lors de l'appui sur le bouton Enregistrer
+                    // Par exemple, vous pouvez soumettre les données ou les enregistrer
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Formulaire soumis')),
+                    );
+                  } else {
+                    // Affiche un message d'erreur global si les conditions ne sont pas remplies
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Veuillez remplir tous les champs')),
+                    );
+                  }
+                },
+                child: Text('Enregistrer'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: TextStyle(fontSize: 18.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(String label, FormFieldValidator<String> validator) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+}
+
+
+
+
+class DamagesForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Dommages',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: ListView(
+          children: [
+            // Ajouter ici les champs pour le formulaire des Dommages
+            _buildField('Description des dommages'),
+            _buildField('Coût estimé'),
+            _buildField('Parties endommagées'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
           ),
         ),
       ),
     );
   }
 }
+
+class ApprovalForm extends StatefulWidget {
+  @override
+  _ApprovalFormState createState() => _ApprovalFormState();
+}
+
+class _ApprovalFormState extends State<ApprovalForm> {
+  final _formKey = GlobalKey<FormState>(); // Key for the form
+  bool _isSubmitting = false; // Variable to track if the form is being submitted
+
+  String? _approbation; // Variable to store the approval selection
+  String? _motifApprobation; // Variable to store the approval reason
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Approbation',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Form(
+          key: _formKey, // Associate the key with the form
+          child: ListView(
+            children: [
+              SizedBox(height: 20),
+              Text('Approuver ?', style: TextStyle(fontSize: 16)),
+              _buildApprovalRadios(),
+              _buildField(
+                'Motif d\'Approbation',
+                    (value) {
+                  if (value == null || value.isEmpty) {
+                    return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                  }
+                  return null; // Validation successful
+                },
+                    (value) => _motifApprobation = value ?? '', // Handle null value
+              ),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isSubmitting = true; // Mark as submitting
+                  });
+                  if (_formKey.currentState!.validate() && _approbation != null) {
+                    _formKey.currentState!.save(); // Save the form fields
+                    // Action to perform when pressing the Save button
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Formulaire soumis')),
+                    );
+                  } else {
+                    // Show a global error message if validation fails
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Veuillez remplir tous les champs')),
+                    );
+                  }
+                },
+                child: Text('Enregistrer'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: TextStyle(fontSize: 18.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildApprovalRadios() {
+    return FormField<String>(
+      validator: (value) {
+        if (_approbation == null) {
+          return _isSubmitting ? 'Ce champ est obligatoire' : null;
+        }
+        return null; // Validation successful
+      },
+      builder: (state) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: RadioListTile<String>(
+                    title: Text('OUI'),
+                    value: 'OUI',
+                    groupValue: _approbation,
+                    onChanged: (value) {
+                      setState(() {
+                        _approbation = value;
+                        state.didChange(value); // Update validation state
+                      });
+                    },
+                    activeColor: Colors.green, // Color when selected
+                  ),
+                ),
+                Expanded(
+                  child: RadioListTile<String>(
+                    title: Text('NON'),
+                    value: 'NON',
+                    groupValue: _approbation,
+                    onChanged: (value) {
+                      setState(() {
+                        _approbation = value;
+                        state.didChange(value); // Update validation state
+                      });
+                    },
+                    activeColor: Colors.green, // Color when selected
+                  ),
+                ),
+              ],
+            ),
+            if (state.hasError)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  state.errorText!,
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildField(
+      String label,
+      FormFieldValidator<String>? validator,
+      FormFieldSetter<String>? onSaved) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        validator: validator,
+        onSaved: onSaved,
+      ),
+    );
+  }
+}
+
+
+class RemovalForm extends StatefulWidget {
+  @override
+  _RemovalFormState createState() => _RemovalFormState();
+}
+
+class _RemovalFormState extends State<RemovalForm> {
+  final _formKey = GlobalKey<FormState>(); // Clé pour le formulaire
+  final TextEditingController _dateController = TextEditingController();
+  bool _isSubmitting = false; // Variable pour suivre l'état de la soumission
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Enlèvement',
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: Colors.green,
+        iconTheme: IconThemeData(color: Colors.white),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(25.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              _buildField('Motif d\'enlèvement', (value) {
+                if (value == null || value.isEmpty) {
+                  return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                }
+                return null;
+              }),
+              _buildDateField('Date de l\'enlèvement'),
+              _buildField('Lieu de l\'enlèvement', (value) {
+                if (value == null || value.isEmpty) {
+                  return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                }
+                return null;
+              }),
+              _buildField('Nom Responsable de MEF', (value) {
+                if (value == null || value.isEmpty) {
+                  return _isSubmitting ? 'Ce champ est obligatoire' : null;
+                }
+                return null;
+              }),
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isSubmitting = true; // Marquer comme étant en soumission
+                  });
+                  if (_formKey.currentState!.validate() && _dateController.text.isNotEmpty) {
+                    // Action à réaliser lors de l'appui sur le bouton Enregistrer
+                    // Par exemple, vous pouvez soumettre les données ou les enregistrer
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Formulaire soumis')),
+                    );
+                  } else {
+                    // Affiche un message d'erreur global si les conditions ne sont pas remplies
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Veuillez remplir tous les champs')),
+                    );
+                  }
+                },
+                child: Text('Enregistrer'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 16.0),
+                  textStyle: TextStyle(fontSize: 18.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildField(String label, FormFieldValidator<String>? validator) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        validator: validator,
+      ),
+    );
+  }
+
+  Widget _buildDateField(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
+      child: TextFormField(
+        controller: _dateController,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+        keyboardType: TextInputType.datetime,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return _isSubmitting ? 'Ce champ est obligatoire' : null;
+          }
+          return null;
+        },
+        onTap: () async {
+          FocusScope.of(context).requestFocus(FocusNode()); // Close the keyboard
+          DateTime? selectedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2000),
+            lastDate: DateTime(2101),
+          );
+
+          if (selectedDate != null) {
+            String formattedDate = DateFormat('dd/MM/yyyy').format(selectedDate);
+            setState(() {
+              _dateController.text = formattedDate;
+            });
+          }
+        },
+      ),
+    );
+  }
+}
+
+
+

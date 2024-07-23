@@ -21,21 +21,6 @@ class HomeScreen extends StatefulWidget {
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
-
-class Statistics {
-  int totalReports = 0;
-  int resolvedReports = 0;
-  int ongoingReports = 0;
-  int reportedReports = 0; // Ajouter un champ pour les signalements signalés
-
-  Statistics({
-    required this.totalReports,
-    required this.resolvedReports,
-    required this.ongoingReports,
-    required this.reportedReports,
-  });
-}
-
 class Slide {
   final String title;
   final String description;
@@ -64,9 +49,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
-
-  late Statistics statistics =
-  Statistics(totalReports: 0, resolvedReports: 0, ongoingReports: 0, reportedReports: 0);
 
   late SharedPreferences _prefs;
   bool _showSlides = true;
@@ -97,29 +79,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchData() async {
     try {
       List<dynamic> fetchedSignalements = await fetchSignalements();
-      Statistics fetchedStatistics = await fetchStatistics();
       setState(() {
         allSignalements = fetchedSignalements;
-        statistics = fetchedStatistics;
+
       });
     } catch (e) {
       // Handle errors
-    }
-  }
-
-  Future<Statistics> fetchStatistics() async {
-    final response = await http.get(Uri.parse(Strings.apiURI + 'statistiques'));
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return Statistics(
-        totalReports: data['signalements'],
-        resolvedReports: data['enleves'],
-        ongoingReports: data['signales'],
-        reportedReports: data['encours'], // Assurez-vous que 'signales' correspond au champ renvoyé par votre API pour les signalements signalés
-      );
-    } else {
-      throw Exception('Error fetching statistics');
     }
   }
 
@@ -335,7 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildHomeScreen() {
     return Scaffold(
       backgroundColor: CustomColor.primaryBackgroundColor,
-      drawer: const DrawerScreen(),
+      //drawer: const DrawerScreen(),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         flexibleSpace: Container(
@@ -405,32 +370,6 @@ class _HomeScreenState extends State<HomeScreen> {
               physics: BouncingScrollPhysics(),
               child: Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(16.0),
-                    margin: const EdgeInsets.all(16.0),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.0),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.green.withOpacity(0.5),
-                          spreadRadius: 5,
-                          blurRadius: 7,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStatItem('Total', statistics.totalReports),
-                        _buildStatItem('Résolus', statistics.resolvedReports),
-                        _buildStatItem('Signalés', statistics.ongoingReports),
-                        _buildStatItem('En Cours', statistics.reportedReports),
-                      ],
-                    ),
-                  ),
-                  _smallContainerWidget(context),
                   if (allSignalements.isNotEmpty)
                     _transactionHistoryWidget(context, allSignalements),
                 ],
@@ -527,13 +466,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _updateScrollIndicatorPosition(double position) {
-    setState(() {
-      _lastScrollIndicatorPosition = position;
-      _showScrollIndicator = true;
-    });
-  }
-
   double _calculateIndicatorPosition() {
     double maxScrollExtent = MediaQuery.of(context).size.height;
     double totalHeight = _getListTotalHeight();
@@ -584,51 +516,6 @@ class _HomeScreenState extends State<HomeScreen> {
         // Handle error
       }
     }
-  }
-
-  Widget _smallContainerWidget(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.all(Dimensions.marginSize),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-            onPressed: () {
-              Get.toNamed(Routes.depositScreen);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20.0),
-              ),
-              padding: EdgeInsets.symmetric(
-                vertical: 12.0,
-                horizontal: 24.0,
-              ),
-              elevation: 4,
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  FontAwesomeIcons.plus,
-                  color: Colors.white,
-                ),
-                SizedBox(width: 8),
-                Text(
-                  Strings.deposit,
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Container _transactionHistoryWidget(
@@ -698,21 +585,19 @@ class _HomeScreenState extends State<HomeScreen> {
       itemBuilder: (BuildContext context, int index) {
         final signalement = signalements[index];
 
-        final monSignal = signalement['id'];
-
         IconData iconData;
         Color iconColor;
         switch (signalement['etat']) {
           case 'SIGNALE':
-            iconData = Icons.flag;
+            iconData = Icons.visibility;
             iconColor = Colors.red;
             break;
           case 'EN COURS':
-            iconData = Icons.hourglass_bottom;
+            iconData = Icons.visibility;
             iconColor = Colors.orange;
             break;
           case 'ENLEVE':
-            iconData = Icons.check;
+            iconData = Icons.visibility;
             iconColor = Colors.green;
             break;
           default:
@@ -851,40 +736,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildStatItem(String label, int value) {
-    Color textColor;
-
-    switch(label) {
-      case 'Total':
-        textColor = Colors.black;
-        break;
-      case 'Résolus':
-        textColor = Colors.green;
-        break;
-      case 'En Cours':
-        textColor = Colors.orange;
-        break;
-      case 'Signalés':
-        textColor = Colors.red;
-        break;
-      default:
-        textColor = Colors.white;
-    }
-
-    return Column(
-      children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 18, color: textColor),
-        ),
-        Text(
-          value.toString(),
-          style: TextStyle(fontSize: 24, color: textColor, fontWeight: FontWeight.bold),
-        ),
-      ],
     );
   }
 }

@@ -135,7 +135,7 @@ class Strings {
   static const String withdraw = 'Withdraw';
   static const String send = 'Send';
   static const String request = 'Request';
-  static const String transactionsHistory = 'Historique des participations ';
+  static const String transactionsHistory = 'Liste des Signalements ';
   static const String myTransactionsHistory = 'Historique de mes participations ';
   static const String moneyDeposit = 'Money Deposit';
   static const String moneyDepositDate = 'March 20, 2022';

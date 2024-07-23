@@ -29,51 +29,6 @@ class _BottomNavigationWidgetState extends State<BottomNavigationWidget> {
           () => Scaffold(
         backgroundColor: CustomColor.primaryBackgroundColor,
         body: mainScreens[_controller.getIndex()],
-        bottomNavigationBar: BottomAppBar(
-          padding: const EdgeInsets.only(bottom: 0.0),
-          //shape: const CircularNotchedRectangle(),
-          color: CustomColor.primaryBackgroundColor,
-          clipBehavior: Clip.hardEdge,
-          notchMargin: 6,
-          //height: kBottomNavigationBarHeight + 50,
-
-          child: BottomNavigationBar(
-            onTap: (index) => _controller.setIndex(index),
-            backgroundColor: CustomColor.primaryColor,
-            currentIndex: _controller.getIndex(),
-            selectedItemColor: CustomColor.whiteColor,
-            unselectedItemColor: CustomColor.whiteColor.withOpacity(0.5),
-            type: BottomNavigationBarType.fixed,
-            unselectedFontSize: 11,
-            selectedFontSize: 12,
-            elevation: 12,
-            selectedIconTheme: IconThemeData(
-              color: Colors.white,
-            ),
-            selectedLabelStyle: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-            items: BottomNavigationController.navigationBarItems.map((item) {
-              return BottomNavigationBarItem(
-                icon: Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(30), // Bordure arrondie
-                      border: Border.all(
-                        color: CustomColor.primaryColor, // Couleur de la bordure
-                        width: 2, // Largeur de la bordure
-                      ),
-                    ),
-                    child: item.icon,
-                  ),
-                ),
-                label: item.label,
-              );
-            }).toList(),
-          ),
-        ),
       ),
     );
   }
