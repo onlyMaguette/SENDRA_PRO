@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 class InfractionForm extends StatefulWidget {
   @override
   _InfractionFormState createState() => _InfractionFormState();
