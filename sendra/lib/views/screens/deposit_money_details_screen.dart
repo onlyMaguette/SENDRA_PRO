@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+
+import '../../utils/strings.dart';
 import 'approbation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +9,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:walletium/controller/deposit_controller.dart';
 import 'package:walletium/controller/deposit_money_details_controller.dart';
-import 'package:walletium/utils/strings.dart';
 import 'enlevement_screen.dart';
 import 'dommages_screen.dart';
 import 'infraction_screen.dart';
@@ -186,9 +187,10 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
               ));
             } else if (title == 'Dommages') {
               Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => DamagesForm(),
+                builder: (context) => DommagesScreen(signalementId: signalementData!['signalementId']),
               ));
-            } else if (title == 'Approbation') {
+            }
+            else if (title == 'Approbation') {
               Navigator.of(context).push(MaterialPageRoute(
                 builder: (context) => ApprovalForm(),
               ));

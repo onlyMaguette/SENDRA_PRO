@@ -39,8 +39,11 @@ dependencies:
   fluttertoast: ^8.0.7
   firebase_auth: ^4.7.1
   shared_preferences: ^2.0.12  # Use the latest version
-  
-  
+  flutter_svg: ^1.0.0
+  scribble: ^0.1.2
+  image_painter: ^0.7.1
+  flutter_signature_pad: ^3.0.1
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
@@ -114,7 +117,6 @@ flutter:
     - assets/images/bg/
     - assets/images/people/
     - assets/images/country/
-    - uploads/
 
   # To add assets to your application, add an assets section, like this:
   # assets:
