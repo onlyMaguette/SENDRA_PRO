@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 
+import 'package:latlong2/latlong.dart';
+
 import '../../utils/strings.dart';
 import 'approbation_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,6 +14,7 @@ import 'package:walletium/controller/deposit_money_details_controller.dart';
 import 'enlevement_screen.dart';
 import 'dommages_screen.dart';
 import 'infraction_screen.dart';
+import 'map_screen.dart';
 import 'vehicule_screen.dart';
 import 'informationBase_screen.dart';
 
@@ -142,7 +145,22 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
       padding: const EdgeInsets.all(16.0),
       child: ElevatedButton.icon(
         onPressed: () {
-          // Ajouter ici l'action pour le bouton de localisation
+          // Exemple de coordonnées initiales et points d'itinéraire
+          LatLng initialLocation = LatLng(48.8588443, 2.2943506); // Coordonnées pour Paris
+          List<LatLng> routePoints = [
+            LatLng(48.8588443, 2.2943506), // Point de départ
+            LatLng(48.859, 2.295) // Point d'arrivée
+          ];
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MapScreen(
+                vehicleLocation: LatLng(14.6928, -17.4467),  // Coordonnées du véhicule
+          // Coordonnées du véhicule
+              ),
+            ),
+          );
         },
         icon: Icon(Icons.location_on),
         label: Text('Localisation'),
@@ -158,6 +176,7 @@ class _DepositMoneyDetailsScreenState extends State<DepositMoneyDetailsScreen> {
       ),
     );
   }
+
 
   Widget _menuItem(String title, [Map<String, dynamic>? signalementData]) {
     return Padding(

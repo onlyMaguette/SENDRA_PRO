@@ -43,6 +43,8 @@ dependencies:
   scribble: ^0.1.2
   image_painter: ^0.7.1
   flutter_signature_pad: ^3.0.1
+  mapbox_maps_flutter: ^2.1.0
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

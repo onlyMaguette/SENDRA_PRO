@@ -34,6 +34,7 @@ dependencies:
   flutter_map: ^6.1.0
   latlong2: #geolocator: ^7.1.1
   geolocator: ^11.0.0
+  mapbox_maps_flutter: ^2.1.0
   geocoding: ^3.0.0
   location:
   fluttertoast: ^8.0.7
